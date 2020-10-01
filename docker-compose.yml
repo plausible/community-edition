@@ -25,10 +25,7 @@ services:
       - 8123:8123
 
   plausible:
-    #image: plausible/analytics
-    build:
-      context: ../plausible
-      dockerfile: ./Dockerfile
+    image: plausible/analytics:dev
     command: sh -c "sleep 10 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh run"
     depends_on:
       - plausible_db
