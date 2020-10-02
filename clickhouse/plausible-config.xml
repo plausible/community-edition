@@ -1,0 +1,13 @@
+<yandex>
+  <logger>
+    <level>warning</level>
+    <console>true</console>
+  </logger>
+  <text_log>
+    <level>warning</level>
+  </text_log>
+  <metric_log>
+    <level>warning</level>
+  </metric_log>
+  <trace_log></trace_log>
+</yandex>
