@@ -17,8 +17,6 @@ services:
     image: yandex/clickhouse-server:latest
     volumes:
       - event-data:/var/lib/clickhouse
-      - ./clickhouse/plausible-config.xml:/etc/clickhouse-server/config.d/plausible-config.xml
-      - ./clickhouse/users-config.xml:/etc/clickhouse-server/users.xml
     ulimits:
       nofile:
         soft: 262144
