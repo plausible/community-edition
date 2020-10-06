@@ -1,0 +1,11 @@
+version: "3.3"
+services:
+  plausible_db:
+    ports:
+      - 5432:5432
+  plausible_events_db:
+    ports:
+      - 8123:8123
+  plausible:
+    ports:
+      - 80:8000
