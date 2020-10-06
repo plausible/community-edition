@@ -32,13 +32,11 @@ services:
       - plausible_events_db
       - mail
     ports:
-      - 80:8000
+      - ${PORT}:8000
     links:
       - plausible_db
       - plausible_events_db
       - mail
-    env_file:
-      - plausible-conf.env
 
 volumes:
   db-data:
