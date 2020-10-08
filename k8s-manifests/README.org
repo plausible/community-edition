@@ -44,6 +44,11 @@
     --from-literal=CLICKHOUSE_DATABASE_URL=http://plausible-events-db:8123/plausible
 #+end_src
 
+#+NAME: apply the service
+#+begin_src shell :results silent
+  kubectl -n plausible apply -f plausible-service.yaml
+#+end_src
+
 #+NAME: create configuration
 #+begin_src shell :results silent
   kubectl -n plausible create configmap plausible \
