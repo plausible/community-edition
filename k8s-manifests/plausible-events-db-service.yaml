@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: plausible-events-db
+  name: plausible-events-db
+spec:
+  ports:
+  - name: "8123"
+    port: 8123
+    targetPort: 8123
+  selector:
+    app: plausible-events-db

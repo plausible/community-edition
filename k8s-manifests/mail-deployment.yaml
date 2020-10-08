@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mail
+  name: mail
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mail
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: mail
+    spec:
+      containers:
+      - image: bytemark/smtp
+        imagePullPolicy: IfNotPresent
+        name: mail
+        resources: {}
+      restartPolicy: Always
