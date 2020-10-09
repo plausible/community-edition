@@ -29,18 +29,17 @@
 
 #+NAME: install Postgres
 #+begin_src shell :pwd ./ :results silent
-  kubectl -n plausible apply -f postgresql.yaml
+  kubectl -n plausible apply -f postgres.yaml
 #+end_src
 
 #+NAME: create secrets
 #+begin_src shell :results silent
-  DATABASE_PWD="$(kubectl -n plausible get secret plausible.plausible-db.credentials.postgresql.acid.zalan.do -o=jsonpath='{.data.password}' | base64 --decode)"
   kubectl -n plausible create secret generic plausible \
     --from-literal=ADMIN_USER_EMAIL=myemail@example.com \
     --from-literal=ADMIN_USER_NAME="Example User" \
     --from-literal=ADMIN_USER_PWD="password" \
     --from-literal=SECRET_KEY_BASE="$(openssl rand -base64 64)" \
-    --from-literal=DATABASE_URL="postgres://plausible:$DATABASE_PWD@plausible-db-pooler/plausible?ssl=true" \
+    --from-literal=DATABASE_URL="postgres://plausible:plausible@postgres/plausible?ssl=false" \
     --from-literal=CLICKHOUSE_DATABASE_URL=http://plausible-events-db:8123/plausible
 #+end_src
 
@@ -57,7 +56,12 @@
 
 #+NAME: install Plausible
 #+begin_src shell :results silent
-  kubectl -n plausible apply -f .
+  kubectl -n plausible apply \
+    -f event-data-persistentvolumeclaim.yaml \
+    -f mail-deployment.yaml \
+    -f plausible-deployment.yaml \
+    -f plausible-events-db-deployment.yaml \
+    -f plausible-events-db-service.yaml
 #+end_src
 
 * Notes and references
