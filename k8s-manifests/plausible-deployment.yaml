@@ -12,55 +12,18 @@ spec:
       labels:
         app: plausible
     spec:
-      initContainers:
-      - command:
-        - bash
-        - -c
-        - /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh db init-admin
-        env:
-        - name: ADMIN_USER_EMAIL
-          valueFrom:
-            secretKeyRef:
-              key: ADMIN_USER_EMAIL
-              name: plausible
-        - name: ADMIN_USER_NAME
-          valueFrom:
-            secretKeyRef:
-              key: ADMIN_USER_NAME
-              name: plausible
-        - name: ADMIN_USER_PWD
-          valueFrom:
-            secretKeyRef:
-              key: ADMIN_USER_PWD
-              name: plausible
-        - name: SECRET_KEY_BASE
-          valueFrom:
-            secretKeyRef:
-              key: SECRET_KEY_BASE
-              name: plausible
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              key: DATABASE_URL
-              name: plausible
-        - name: CLICKHOUSE_DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              key: CLICKHOUSE_DATABASE_URL
-              name: plausible
-        - name: BASE_URL
-          valueFrom:
-            configMapKeyRef:
-              key: BASE_URL
-              name: plausible
-        image: plausible/analytics:dev
-        imagePullPolicy: Always
-        name: plausible-init
       containers:
-      - command:
-          - /bin/bash
-          - -c
-          - /entrypoint.sh run
+      - name: plausible
+        image: plausible/analytics:dev
+        imagePullPolicy: Always
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+        command:
+          - /app/bin/plausible
+          - start
         env:
         - name: ADMIN_USER_EMAIL
           valueFrom:
@@ -97,11 +60,65 @@ spec:
             configMapKeyRef:
               key: BASE_URL
               name: plausible
-        image: plausible/analytics:dev
-        imagePullPolicy: Always
-        name: plausible
+        volumeMounts:
+        - name: app-tmp
+          mountPath: /app/tmp
         ports:
         - name: http
           containerPort: 8000
         resources: {}
-      restartPolicy: Always
+      initContainers:
+      - name: plausible-init
+        image: plausible/analytics:dev
+        imagePullPolicy: Always
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+        command:
+        - bash
+        - -c
+        - /app/createdb.sh && /app/migrate.sh && /app/init-admin.sh
+        env:
+        - name: ADMIN_USER_EMAIL
+          valueFrom:
+            secretKeyRef:
+              key: ADMIN_USER_EMAIL
+              name: plausible
+        - name: ADMIN_USER_NAME
+          valueFrom:
+            secretKeyRef:
+              key: ADMIN_USER_NAME
+              name: plausible
+        - name: ADMIN_USER_PWD
+          valueFrom:
+            secretKeyRef:
+              key: ADMIN_USER_PWD
+              name: plausible
+        - name: SECRET_KEY_BASE
+          valueFrom:
+            secretKeyRef:
+              key: SECRET_KEY_BASE
+              name: plausible
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: DATABASE_URL
+              name: plausible
+        - name: CLICKHOUSE_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: CLICKHOUSE_DATABASE_URL
+              name: plausible
+        - name: BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              key: BASE_URL
+              name: plausible
+        volumeMounts:
+        - name: app-tmp
+          mountPath: /app/tmp
+      volumes:
+      - name: app-tmp
+        emptyDir: {}
