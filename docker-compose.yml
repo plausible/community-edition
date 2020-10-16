@@ -29,10 +29,6 @@ services:
       - mail
     ports:
       - 80:8000
-    links:
-      - plausible_db
-      - plausible_events_db
-      - mail
     env_file:
       - plausible-conf.env
 
