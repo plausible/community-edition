@@ -1,0 +1,319 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "plausible-analytics.fullname" . }}
+  labels:
+    app: plausible
+    {{- include "plausible-analytics.labels" . | nindent 4 }}
+{{- if .Values.labels }}
+{{- with .Values.labels }}
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
+  annotations:
+    checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      app: plausible
+      {{- include "plausible-analytics.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        app: plausible
+        {{- include "plausible-analytics.selectorLabels" . | nindent 8 }}
+      {{- if .Values.labels }}
+      {{- with .Values.labels }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "plausible-analytics.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /entrypoint.sh
+            - run
+          env:
+            {{- if .Values.adminUser.email }}
+            - name: ADMIN_USER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  key: ADMIN_USER_EMAIL
+                  name: {{ include "plausible-analytics.fullname" . }}
+            {{- end }}
+            {{- if .Values.adminUser.email }}
+            - name: ADMIN_USER_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: ADMIN_USER_NAME
+                  name: {{ include "plausible-analytics.fullname" . }}
+            {{- end }}
+            {{- if .Values.adminUser.email }}
+            - name: ADMIN_USER_PWD
+              valueFrom:
+                secretKeyRef:
+                  key: ADMIN_USER_PWD
+                  name: {{ include "plausible-analytics.fullname" . }}
+            {{- end }}
+            {{- if .Values.database.enabled }}
+            {{- if .Values.database.url }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: DATABASE_URL
+                  name: {{ include "plausible-analytics.fullname" . }}
+            {{- end }}
+            {{- end }}
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  key: SECRET_KEY_BASE
+                  name: {{ include "plausible-analytics.fullname" . }}
+            {{- if .Values.clickhouse.enabled }}
+            {{- if .Values.clickhouse.url }}
+            - name: CLICKHOUSE_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: CLICKHOUSE_DATABASE_URL
+                  name: {{ include "plausible-analytics.fullname" . }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.baseURL }}
+            - name: BASE_URL
+              value: {{ .Values.baseURL | toString | quote }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          volumeMounts:
+          - name: app-tmp
+            mountPath: /app/tmp
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      initContainers:
+      - name: plausible-init
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+        - /bin/sh
+        - -x
+        - -c
+        - /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh db init-admin
+        env:
+          {{- if .Values.adminUser.email }}
+          - name: ADMIN_USER_EMAIL
+            valueFrom:
+              secretKeyRef:
+                key: ADMIN_USER_EMAIL
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.adminUser.email }}
+          - name: ADMIN_USER_NAME
+            valueFrom:
+              secretKeyRef:
+                key: ADMIN_USER_NAME
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.adminUser.email }}
+          - name: ADMIN_USER_PWD
+            valueFrom:
+              secretKeyRef:
+                key: ADMIN_USER_PWD
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.database.enabled }}
+          {{- if .Values.database.url }}
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                key: DATABASE_URL
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- end }}
+          - name: SECRET_KEY_BASE
+            valueFrom:
+              secretKeyRef:
+                key: SECRET_KEY_BASE
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- if .Values.clickhouse.enabled }}
+          {{- if .Values.clickhouse.url }}
+          - name: CLICKHOUSE_DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                key: CLICKHOUSE_DATABASE_URL
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.disableAuth }}
+          - name: DISABLE_AUTH
+            value: {{ .Values.disableAuth | toString | quote }}
+          {{- end }}
+          {{- if .Values.disableRegistration }}
+          - name: DISABLE_REGISTRATION
+            value: {{ .Values.disableRegistration | toString | quote }}
+          {{- end }}
+          {{- if .Values.disableAuth }}
+          - name: BASE_URL
+            value: {{ .Values.baseURL | toString | quote }}
+          {{- end }}
+          {{- if .Values.smtp.enabled }}
+          {{- if .Values.smtp.mailer.emailAddress }}
+          - name: MAILER_EMAIL
+            valueFrom:
+              secretKeyRef:
+                key: MAILER_EMAIL
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.smtp.adapter }}
+          - name: MAILER_ADAPTER
+            valueFrom:
+              secretKeyRef:
+                key: MAILER_ADAPTER
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.smtp.host }}
+          - name: SMTP_HOST_ADDR
+            valueFrom:
+              secretKeyRef:
+                key: SMTP_HOST_ADDR
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.smtp.port }}
+          - name: SMTP_HOST_PORT
+            valueFrom:
+              secretKeyRef:
+                key: SMTP_HOST_PORT
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.smtp.username }}
+          - name: SMTP_USER_NAME
+            valueFrom:
+              secretKeyRef:
+                key: SMTP_USER_NAME
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.smtp.password }}
+          - name: SMTP_USER_PWD
+            valueFrom:
+              secretKeyRef:
+                key: SMTP_USER_PWD
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.smtp.ssl.enabled }}
+          - name: SMTP_HOST_SSL_ENABLED
+            valueFrom:
+              secretKeyRef:
+                key: SMTP_HOST_SSL_ENABLED
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.smtp.retires }}
+          - name: SMTP_RETRIES
+            valueFrom:
+              secretKeyRef:
+                key: SMTP_HOST_SSL_ENABLED
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.google.clientID }}
+          - name: GOOGLE_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: GOOGLE_CLIENT_ID
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.google.clientSecret }}
+          - name: GOOGLE_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: GOOGLE_CLIENT_SECRET
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.twitter.consumer.key }}
+          - name: TWITTER_CONSUMER_KEY
+            valueFrom:
+              secretKeyRef:
+                key: TWITTER_CONSUMER_KEY
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.twitter.consumer.secret }}
+          - name: TWITTER_CONSUMER_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: TWITTER_CONSUMER_SECRET
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.twitter.access.token }}
+          - name: TWITTER_ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: TWITTER_ACCESS_TOKEN
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.twitter.access.secret }}
+          - name: TWITTER_ACCESS_TOKEN_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: TWITTER_ACCESS_TOKEN_SECRET
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.postmark.apiKey }}
+          - name: POSTMARK_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: POSTMARK_API_KEY
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+          {{- if .Values.geoliteCountryDB }}
+          - name: GEOLITE2_COUNTRY_DB
+            valueFrom:
+              secretKeyRef:
+                key: GEOLITE2_COUNTRY_DB
+                name: {{ include "plausible-analytics.fullname" . }}
+          {{- end }}
+        volumeMounts:
+          - name: app-tmp
+            mountPath: /app/tmp
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: app-tmp
+        emptyDir: {}

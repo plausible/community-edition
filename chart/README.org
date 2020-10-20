@@ -1,0 +1,26 @@
+#+TITLE: Helm chart
+
+* Installation
+
+#+begin_src shell :pwd ./ :results silent
+  helm install plausible -n plausible \
+    --debug \
+    --set baseURL=http://localhost:8000 \
+    --set adminUser.email=myemail@example.com \
+    --set adminUser.name="Test User" \
+    --set adminUser.password="password" \
+    --set database.url="postgres://plausible:plausible@postgres/plausible?ssl=false" \
+    --set clickhouse.url="http://plausible-events-db:8123/plausible" \
+    --set disableRegistration=true \
+    --set disableAuth=true \
+    --set image.tag=dev \
+    plausible-analytics
+#+end_src
+
+#+begin_src shell :pwd ./
+  kubectl -n plausible get pods,svc
+#+end_src
+
+#+begin_src shell :pwd ./ :results silent
+  helm uninstall plausible -n plausible
+#+end_src
