@@ -43,6 +43,8 @@ services:
       - geoip
       - plausible_db
       - plausible_events_db
+    ports:
+      - 80:8000 #Remove this line if you plan to use Traefik
     env_file:
       - env/plausible-conf.env
     networks:
@@ -54,10 +56,11 @@ services:
       - geoip:/geoip:ro
     restart: always
     labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.plausible.rule=Host(`yourdomain.com`)" # replace this with your own domain
-        - "traefik.http.routers.plausible.entrypoints=websecure"
-        - "traefik.http.services.plausible.loadbalancer.server.port=8000"
+      # Uncomment line below if you plan to use Traefik
+      # - "traefik.enable=true"
+      # - "traefik.http.routers.plausible.rule=Host(`yourdomain.com`)" # replace this with your own domain
+      # - "traefik.http.routers.plausible.entrypoints=websecure"
+      # - "traefik.http.services.plausible.loadbalancer.server.port=8000"
 
 volumes:
   db-data:
