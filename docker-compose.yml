@@ -3,6 +3,15 @@ services:
   mail:
     image: bytemark/smtp
     restart: always
+    
+  geoip:
+    image: maxmindinc/geoipupdate
+    environment:
+      - GEOIPUPDATE_EDITION_IDS=GeoLite2-Country
+      - GEOIPUPDATE_FREQUENCY=168 # update every 7 days
+    env_file: env/geoip-conf.env
+    volumes:
+      - geoip:/usr/share/GeoIP
 
   plausible_db:
     image: postgres:12
@@ -10,6 +19,9 @@ services:
       - db-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
+    networks:
+      - internal
+    restart: always
 
   plausible_events_db:
     image: yandex/clickhouse-server:latest
@@ -19,24 +31,33 @@ services:
       nofile:
         soft: 262144
         hard: 262144
+    networks:
+      - internal
+    restart: always
 
   plausible:
     image: plausible/analytics:latest
     command: sh -c "sleep 10 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh db init-admin && /entrypoint.sh run"
     depends_on:
+      - mail
+      - geoip
       - plausible_db
       - plausible_events_db
-      - mail
-    ports:
-      - 80:8000 #Remove this line if you plan to use Traefik
     env_file:
-      - plausible-conf.env
+      - env/plausible-conf.env
+    networks:
+      - internal
+      - web
+    environment:
+      - GEOLITE2_COUNTRY_DB=/geoip/GeoLite2-Country.mmdb
+    volumes:
+      - geoip:/geoip:ro
+    restart: always
     labels:
-      # Uncomment line below if you plan to use Traefik
-      # - "traefik.enable=true"
-      # - "traefik.http.routers.plausible.rule=Host(`yourdomain.com`)" # replace this with your own domain
-      # - "traefik.http.routers.plausible.entrypoints=websecure"
-      # - "traefik.http.services.plausible.loadbalancer.server.port=8000"
+        - "traefik.enable=true"
+        - "traefik.http.routers.plausible.rule=Host(`yourdomain.com`)" # replace this with your own domain
+        - "traefik.http.routers.plausible.entrypoints=websecure"
+        - "traefik.http.services.plausible.loadbalancer.server.port=8000"
 
 volumes:
   db-data:
@@ -45,3 +66,9 @@ volumes:
     driver: local
   geoip:
     driver: local
+
+networks:
+  web:
+    external: true
+  internal:
+    external: false
