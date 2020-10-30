@@ -16,7 +16,6 @@ services:
   plausible:
     labels:
       virtual.host: "example.com" # change to your domain name
-      virtual.alias: "www.example.com" # change to any aliases you use (or remove)
       virtual.port: "8000"
       virtual.tls-email: "admin@example.com" # change to your email
         
