@@ -5,6 +5,8 @@ services:
       - geoip
     environment:
       - GEOLITE2_COUNTRY_DB=/geoip/GeoLite2-Country.mmdb
+    volumes:
+      - geoip:/geoip:ro
 
   geoip:
     image: maxmindinc/geoipupdate
