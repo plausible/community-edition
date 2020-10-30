@@ -7,3 +7,19 @@ If you aren't running an existing reverse proxy, then you can use the [`caddy-ge
 ```shell
 $ docker-compose -f docker-compose.yml -f reverse-proxy/docker-compose.caddy-gen.yml up
 ```
+
+## Existing reverse proxy
+
+If you are already running a reverse proxy, then the above will not work as it will clash with the existing port bindings. You should instead use one of the available configuration files:
+
+### NGINX
+
+If you already have NGINX running as a system service, use the configuration file in the `nginx` directory.
+
+Edit the file `reverse-proxy/nginx/plausible` to contain the domain name you use for your server, then copy it into NGINX's configuration folder. Enable it by creating a symlink in NGINX's enabled sites folder. Finally use Certbot to create a TLS certificate for your site.
+
+```shell
+$ sudo cp reverse-proxy/nginx/plausible /etc/nginx/sites-available
+$ sudo ln -s /etc/nginx/sites-available/plausible /etc/nginx/sites-enabled/plausible
+$ sudo certbot --nginx
+```
