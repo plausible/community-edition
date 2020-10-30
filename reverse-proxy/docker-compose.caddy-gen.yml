@@ -14,8 +14,6 @@ services:
       - plausible
 
   plausible:
-    ports:
-      - 8000:8000
     labels:
       virtual.host: "example.com" # change to your domain name
       virtual.alias: "www.example.com" # change to any aliases you use (or remove)
@@ -25,4 +23,3 @@ services:
 volumes:
     caddy-certificates:
         driver: local
-        
