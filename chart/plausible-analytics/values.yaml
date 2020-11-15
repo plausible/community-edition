@@ -4,52 +4,52 @@
 
 disableAuth: false
 disableRegistration: false
-baseURL:
+baseURL: ""
 
 adminUser:
-  email:
-  name:
-  password:
+  email: ""
+  name: ""
+  password: ""
 
 # SECRET_KEY_BASE is Helm randAlphaNum 90
 
 database:
   enabled: true
-  url:
+  url: "postgres://postgres:postgres@postgres/plausible?ssl=off"
 
 clickhouse:
   enabled: true
-  url:
+  url: "http://plausible-events-db:8123/plausible"
 
 smtp:
   enabled: true
   mailer:
-    emailAddress:
-    adapter:
-  host:
-  port:
-  username:
-  password:
+    emailAddress: ""
+    adapter: ""
+  host: ""
+  port: ""
+  username: ""
+  password: ""
   ssl:
     enabled: false
   retries: 2
 
 postmark:
-  apiKey:
+  apiKey: ""
 
-geoliteCountryDB:
+geoliteCountryDB: ""
 
 google:
-  clientID:
-  clientSecret:
+  clientID: ""
+  clientSecret: ""
 
 twitter:
   consumer:
-    key:
-    secret:
+    key: ""
+    secret: ""
   access:
-    token:
-    secret:
+    token: ""
+    secret: ""
 
 labels: {}
 extraEnv: []
