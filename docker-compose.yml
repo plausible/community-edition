@@ -5,7 +5,7 @@ services:
     restart: always
 
   plausible_db:
-    image: postgres:12
+    image: postgres:latest # or 13
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
