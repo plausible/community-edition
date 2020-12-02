@@ -11,4 +11,5 @@
     <trace_log remove="remove"/>
     <metric_log remove="remove"/>
     <asynchronous_metric_log remove="remove"/>
+    <listen_host>0.0.0.0</listen_host>
 </yandex>
