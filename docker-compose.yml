@@ -30,7 +30,7 @@ services:
       - plausible_events_db
       - mail
     ports:
-      - 8000:8000
+      - 127.0.0.1:8000:8000
     env_file:
       - plausible-conf.env
 
