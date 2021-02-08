@@ -33,7 +33,7 @@ services:
       - 8000:8000
     env_file:
       - plausible-conf.env
-
+      - plausible-smtp.env
 volumes:
   db-data:
     driver: local
