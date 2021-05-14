@@ -12,57 +12,69 @@
 * Setup
 
 #+NAME: create namespace
-#+begin_src shell :results silent
-  kubectl create ns plausible
+#+begin_src tmate :window plausible-setup
+kubectl create ns plausible
 #+end_src
 
+#+NAME: label the namespace
+#+BEGIN_SRC tmate :window plausible-setup
+kubectl label ns plausible cert-manager-tls=sync --overwrite
+#+END_SRC
+
 #+NAME: create the database secrets
-#+begin_src shell :results silent
-  kubectl -n plausible create secret generic postgres-configuration \
-    --from-literal=POSTGRES_DB=plausible \
-    --from-literal=POSTGRES_USER=plausible \
-    --from-literal=POSTGRES_PASSWORD=plausible \
-    --from-literal=PGUSER=plausible \
-    --from-literal=PGPASSWORD=plausible \
-    --from-literal=PGDATABASE=plausible
+#+begin_src  tmate :window plausible-setup
+kubectl -n plausible create secret generic postgres-configuration \
+  --from-literal=POSTGRES_DB=plausible \
+  --from-literal=POSTGRES_USER=plausible \
+  --from-literal=POSTGRES_PASSWORD=plausible \
+  --from-literal=PGUSER=plausible \
+  --from-literal=PGPASSWORD=plausible \
+  --from-literal=PGDATABASE=plausible \
+  --dry-run=client \
+  -o yaml | kubectl apply -f -
 #+end_src
 
 #+NAME: install Postgres
-#+begin_src shell :pwd ./ :results silent
-  kubectl -n plausible apply -f postgres.yaml
+#+begin_src  tmate :window plausible-setup
+kubectl -n plausible apply -f postgres.yaml
 #+end_src
 
 #+NAME: create secrets
-#+begin_src shell :results silent
-  kubectl -n plausible create secret generic plausible \
-    --from-literal=ADMIN_USER_EMAIL=myemail@example.com \
-    --from-literal=ADMIN_USER_NAME="Example User" \
-    --from-literal=ADMIN_USER_PWD="password" \
-    --from-literal=SECRET_KEY_BASE="$(openssl rand -base64 64)" \
-    --from-literal=DATABASE_URL="postgres://plausible:plausible@postgres/plausible?ssl=false" \
-    --from-literal=CLICKHOUSE_DATABASE_URL=http://plausible-events-db:8123/plausible
-#+end_src
-
-#+NAME: apply the service
-#+begin_src shell :results silent
-  kubectl -n plausible apply -f plausible-service.yaml
+#+begin_src tmate :window plausible-setup
+kubectl -n plausible create secret generic plausible \
+  --from-literal=ADMIN_USER_EMAIL="$GIT_AUTHOR_EMAIL" \
+  --from-literal=ADMIN_USER_NAME="$GIT_AUTHOR_NAME" \
+  --from-literal=ADMIN_USER_PWD="password" \
+  --from-literal=SECRET_KEY_BASE="$(openssl rand -base64 64)" \
+  --from-literal=DATABASE_URL="postgres://plausible:plausible@postgres/plausible?ssl=false" \
+  --from-literal=CLICKHOUSE_DATABASE_URL=http://plausible-events-db:8123/plausible \
+  --dry-run=client \
+  -o yaml | kubectl apply -f -
 #+end_src
 
 #+NAME: create configuration
-#+begin_src shell :results silent
-  kubectl -n plausible create configmap plausible \
-    --from-literal=BASE_URL=http://$(minikube ip):$(kubectl -n plausible get svc plausible -o=jsonpath='{.spec.ports[0].nodePort}')
+#+begin_src tmate :window plausible-setup
+kubectl -n plausible create configmap plausible \
+  --from-literal=BASE_URL=https://plausible.$SHARINGIO_PAIR_BASE_DNS_NAME \
+  --dry-run=client \
+  -o yaml | kubectl apply -f -
 #+end_src
 
 #+NAME: install Plausible
-#+begin_src shell :results silent
-  kubectl -n plausible apply \
-    -f event-data-persistentvolumeclaim.yaml \
-    -f mail-deployment.yaml \
-    -f plausible-deployment.yaml \
-    -f plausible-events-db-deployment.yaml \
-    -f plausible-events-db-service.yaml
+#+begin_src tmate :window plausible-setup
+kubectl -n plausible apply \
+  -f event-data-persistentvolumeclaim.yaml \
+  -f mail-deployment.yaml \
+  -f plausible-deployment.yaml \
+  -f plausible-service.yaml \
+  -f plausible-ingress.yaml \
+  -f plausible-events-db-deployment.yaml \
+  -f plausible-events-db-service.yaml
 #+end_src
+
+#+BEGIN_SRC tmate :window plausible-setup
+kubectl -n plausible exec -it statefulset/postgres -- psql -c "UPDATE users SET email_verified = true;"
+#+END_SRC
 
 * Notes and references
 - https://docs.plausible.io/self-hosting-configuration/

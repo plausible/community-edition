@@ -77,7 +77,7 @@ spec:
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
         command:
-        - bash
+        - sh
         - -c
         - /app/createdb.sh && /app/migrate.sh && /app/init-admin.sh
         env:
