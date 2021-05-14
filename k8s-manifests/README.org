@@ -2,11 +2,7 @@
 
 * Prelimiary requirements
 
-- Minikube
-- Postgres-Operator
-
 ** Notes
-- Minikube can be switched out for Kind
 - Postgres manifests are also included, in case you don't want to deploy a highly available Postgres database locally (~DATABASE_URL~ will need to be updated also)
 
 * Setup
