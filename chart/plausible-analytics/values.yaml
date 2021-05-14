@@ -4,7 +4,6 @@
 
 disableAuth: false
 disableRegistration: false
-baseURL: ""
 
 adminUser:
   email: ""

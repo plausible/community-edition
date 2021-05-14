@@ -98,10 +98,8 @@ spec:
                   name: {{ include "plausible-analytics.fullname" . }}
             {{- end }}
             {{- end }}
-            {{- if .Values.baseURL }}
             - name: BASE_URL
-              value: {{ .Values.baseURL | toString | quote }}
-            {{- end }}
+              value: "http{{ if $.Values.ingress.tls }}s{{ end }}://{{ (first .Values.ingress.hosts).host }}"
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -185,7 +183,6 @@ spec:
           {{- end }}
           {{- if .Values.disableAuth }}
           - name: BASE_URL
-            value: {{ .Values.baseURL | toString | quote }}
           {{- end }}
           {{- if .Values.smtp.enabled }}
           {{- if .Values.smtp.mailer.emailAddress }}
