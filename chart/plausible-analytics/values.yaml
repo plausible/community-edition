@@ -5,6 +5,8 @@
 disableAuth: false
 disableRegistration: false
 
+secretKeyBase: ""
+
 adminUser:
   email: ""
   name: ""
