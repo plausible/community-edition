@@ -6,7 +6,6 @@
 |-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------|
 | disableAuth                                   | Disables authentication completely, no registration, login will be shown                                        | ~false~                                                   |
 | disableRegistration                           | Disables registration of new users, keep your admin credentials handy                                           | ~false~                                                   |
-| baseURL                                       | The hosting url of the server, used for URL generation. In production systems, this should be your ingress host | ~""~                                                      |
 | adminUser.email                               | The default ("admin") user email                                                                                | ~""~                                                      |
 | adminUser.name                                | Admin user's name                                                                                               | ~""~                                                      |
 | adminUser.password                            | The default ("admin") user password                                                                             | ~""~                                                      |
@@ -70,7 +69,6 @@
 #+begin_src shell :pwd ./ :results silent
   helm install plausible -n plausible \
     --debug \
-    --set baseURL=http://localhost:8000 \
     --set adminUser.email=myemail@example.com \
     --set adminUser.name="Test User" \
     --set adminUser.password="password" \
