@@ -53,7 +53,7 @@ spec:
             - run
           env:
             - name: PORT
-              value: {{ .Values.service.port }}
+              value: {{ .Values.service.port | toString | quote }}
             {{- if .Values.adminUser.email }}
             - name: ADMIN_USER_EMAIL
               valueFrom:
