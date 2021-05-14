@@ -52,6 +52,8 @@ spec:
             - /entrypoint.sh
             - run
           env:
+            - name: PORT
+              value: {{ .Values.service.port }}
             {{- if .Values.adminUser.email }}
             - name: ADMIN_USER_EMAIL
               valueFrom:
