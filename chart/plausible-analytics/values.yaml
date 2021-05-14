@@ -128,3 +128,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+extraVolumeMounts: []
+extraVolumes: []
