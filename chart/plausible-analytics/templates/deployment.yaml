@@ -181,10 +181,8 @@ spec:
           - name: DISABLE_REGISTRATION
             value: {{ .Values.disableRegistration | toString | quote }}
           {{- end }}
-          {{- if .Values.disableAuth }}
           - name: BASE_URL
             value: "http{{ if $.Values.ingress.tls }}s{{ end }}://{{ (first .Values.ingress.hosts).host }}"
-          {{- end }}
           {{- if .Values.smtp.enabled }}
           {{- if .Values.smtp.mailer.emailAddress }}
           - name: MAILER_EMAIL
