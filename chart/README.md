@@ -151,7 +151,12 @@ spec:
 
 Create the password for the database (optional)
 ```bash
-kubectl -n plausible create secret generic plausible.plausible-db.credentials.postgresql.acid.zalan.do --from-literal=password=plausible --from-literal=username=plausible --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n plausible create secret generic \
+  plausible.plausible-db.credentials.postgresql.acid.zalan.do \
+  --from-literal=password=plausible \
+  --from-literal=username=plausible \
+  --dry-run=client -o yaml \
+    | kubectl apply -f -
 ```
 
 Create the Postgres database
@@ -163,7 +168,8 @@ kubectl apply -f postgresql.yaml
 Install the Clickhouse operator
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/master/deploy/operator/clickhouse-operator-install.yaml
+kubectl apply -f \
+  https://raw.githubusercontent.com/Altinity/clickhouse-operator/master/deploy/operator/clickhouse-operator-install.yaml
 ```
 
 Declare the Clickhouse installation
@@ -324,5 +330,10 @@ plausible-plausible-analytics-7fd5c7dc88-z78vj   1/1     Running   0          11
 Mark account as verified
 
 ```bash
-kubectl -n plausible exec -it deployment/plausible-db-pooler -- psql postgresql://plausible:plausible@plausible-db-pooler/plausible?sslmode=require -c "UPDATE users SET email_verified = true;"
+kubectl -n plausible \
+  exec -it \
+  deployment/plausible-db-pooler -- \
+    psql \
+    postgresql://plausible:plausible@plausible-db-pooler/plausible?sslmode=require \
+      -c "UPDATE users SET email_verified = true;"
 ```
