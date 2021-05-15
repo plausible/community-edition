@@ -87,3 +87,112 @@
 #+begin_src shell :pwd ./ :results silent
   helm uninstall plausible -n plausible
 #+end_src
+
+#+BEGIN_SRC yaml :tangle /tmp/postgres-operator.yaml
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: postgres-operator
+  namespace: postgres-operator
+spec:
+  releaseName: postgres-operator
+  chart:
+    git: https://github.com/zalando/postgres-operator.git
+    ref: v1.6.1
+    path: charts/postgres-operator
+    values:
+      configKubernetes:
+        enable_pod_antiaffinity: "true"
+#+END_SRC
+
+#+BEGIN_SRC tmate :window plausible-setup
+kubectl create ns postgres-operator
+kubectl apply -f /tmp/postgres-operator.yaml
+#+END_SRC
+
+#+BEGIN_SRC yaml :tangle /tmp/postgresql.yaml
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: plausible-db
+  namespace: plausible
+spec:
+  enableConnectionPooler: true
+  connectionPooler:
+    mode: session
+    resources:
+      requests:
+        cpu: 250m
+        memory: 100Mi
+      limits:
+        cpu: "1"
+        memory: 100Mi
+  teamId: "plausible"
+  volume:
+    size: 3Gi
+  numberOfInstances: 3
+  users:
+    plausible:  # database owner
+    - superuser
+    - createdb
+  databases:
+    plausible: plausible  # dbname: owner
+  postgresql:
+    version: "12"
+#+END_SRC
+
+#+BEGIN_SRC tmate :window plausible-setup
+kubectl -n plausible create secret generic plausible.plausible-db.credentials.postgresql.acid.zalan.do --from-literal=password=plausible --from-literal=username=plausible --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -f /tmp/postgresql.yaml
+#+END_SRC
+
+* Deploying with Helm-Operator
+#+BEGIN_SRC yaml :tangle /tmp/plausible.yaml
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: plausible
+  namespace: plausible
+spec:
+  chart:
+    git: https://github.com/BobyMCbobs/plausible-hosting
+    path: chart/plausible-analytics
+    ref: fffcb3e87395d42e73ccd6034d8008ba68c216b2
+  releaseName: plausible
+  values:
+    replicaCount: 3
+    adminUser:
+      name: "My Name Here"
+      email: "my-email@address.here"
+      password: "a-secure-password-here"
+    database:
+      url: "postgres://plausible:plausible@plausible-db-pooler.plausible/plausible?ssl=true"
+    clickhouse:
+      url: "http://plausible-events-db:8123/plausible"
+    secretKeyBase: "hello-this-is-plausible-analytics-this-value-must-be-at-least-64-bytes-long"
+    extraVolumes:
+      - name: tmptmp
+        emptyDir: {}
+    extraVolumeMounts:
+      - name: tmptmp
+        mountPath: /tmp/tmp
+    ingress:
+      enabled: true
+      hosts:
+      - host: plausible.bobymcbobs-weekend.pair.sharing.io
+        paths:
+        - /
+      realIPHeader: X-Real-Ip
+      tls:
+      - hosts:
+        - plausible.bobymcbobs-weekend.pair.sharing.io
+        secretName: letsencrypt-prod
+#+END_SRC
+
+#+BEGIN_SRC tmate :window plausible-setup
+kubectl apply -f /tmp/plausible.yaml
+#+END_SRC
+
+#+BEGIN_SRC tmate :window plausible-setup
+kubectl psql -n plausible plausible-db plausible psql -c "UPDATE users SET email_verified = true;"
+#+END_SRC
