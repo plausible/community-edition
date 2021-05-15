@@ -295,6 +295,9 @@ spec:
       minReplicas: 3
       maxReplicas: 10
       targetCPUUtilizationPercentage: 80
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 2
     ingress:
       enabled: true
       hosts:
