@@ -255,9 +255,9 @@ metadata:
   namespace: plausible
 spec:
   chart:
-    git: https://github.com/BobyMCbobs/plausible-hosting
+    git: https://github.com/plausible/hosting
     path: chart/plausible-analytics
-    ref: fffcb3e87395d42e73ccd6034d8008ba68c216b2
+    ref: 1efc73f64b76e51cee1935b6a01b6a7529fded41
   releaseName: plausible
   values:
     replicaCount: 3
