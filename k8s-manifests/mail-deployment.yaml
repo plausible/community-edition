@@ -20,4 +20,7 @@ spec:
         imagePullPolicy: IfNotPresent
         name: mail
         resources: {}
+        ports:
+          - name: mail
+            containerPort: 25
       restartPolicy: Always

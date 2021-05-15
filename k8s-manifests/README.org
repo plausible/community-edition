@@ -61,6 +61,7 @@ kubectl -n plausible create configmap plausible \
 kubectl -n plausible apply \
   -f event-data-persistentvolumeclaim.yaml \
   -f mail-deployment.yaml \
+  -f mail-service.yaml \
   -f plausible-deployment.yaml \
   -f plausible-service.yaml \
   -f plausible-ingress.yaml \
