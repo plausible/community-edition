@@ -283,6 +283,18 @@ spec:
       ssl:
         enabled: true
     secretKeyBase: "hello-this-is-plausible-analytics-this-value-must-be-at-least-64-bytes-long"
+    resources:
+      limits:
+        cpu: 1
+        memory: 200Mi
+      requests:
+        cpu: 1
+        memory: 200Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 3
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 80
     ingress:
       enabled: true
       hosts:
