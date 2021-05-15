@@ -84,6 +84,48 @@ Create the namespace for plausible to be installed into
 kubectl create ns plausible
 ```
 
+## Cert-Manager
+[Cert-Manager](http://cert-manager.io/) utilises LetsEncrypt to obtain certificates for HTTP + TLS termination.
+
+Declare the LetsEncrypt certs (certs.yaml)
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: my-email@address.here
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+        selector:
+          dnsNames:
+            - plausible.my-site.here
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: letsencrypt-prod
+  namespace: plausible
+spec:
+  secretName: letsencrypt-prod
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - plausible.my-site.here
+```
+
+``` bash
+kubectl apply -f certs.yaml
+```
+
 ## Helm-Operator
 [Helm-Operator](https://docs.fluxcd.io/projects/helm-operator/en/stable/) enables declarive installation of Helm charts.
 See the [docs](https://docs.fluxcd.io/projects/helm-operator/en/stable/references/chart/) for installation.
