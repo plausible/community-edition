@@ -73,8 +73,8 @@ spec:
               memory: 2Gi
               cpu: 1500m
             requests:
-              memory: 128Mi
-              cpu: 250m
+              memory: 65Mi
+              cpu: 15m
           readinessProbe:
             exec:
               command:

@@ -55,7 +55,7 @@ spec:
               cpu: 500m
             requests:
               memory: 5Mi
-              cpu: 100m
+              cpu: 1m
           readinessProbe:
             tcpSocket:
               port: 25

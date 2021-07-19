@@ -71,8 +71,8 @@ spec:
               memory: 2Gi
               cpu: 1500m
             requests:
-              memory: 200Mi
-              cpu: 250m
+              memory: 80Mi
+              cpu: 10m
           readinessProbe:
             httpGet:
               path: /ping

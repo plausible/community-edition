@@ -83,8 +83,8 @@ spec:
               memory: 2Gi
               cpu: 1500m
             requests:
-              memory: 200Mi
-              cpu: 250m
+              memory: 140Mi
+              cpu: 10m
           readinessProbe:
             httpGet:
               path: /api/health
