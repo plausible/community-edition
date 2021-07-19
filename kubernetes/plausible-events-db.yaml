@@ -18,19 +18,8 @@ spec:
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: plausible
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: plausible-events-db-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: plausible-events-db
   labels:
@@ -39,6 +28,7 @@ metadata:
     app.kubernetes.io/part-of: plausible
 spec:
   replicas: 1
+  serviceName: plausible-events-db
   selector:
     matchLabels:
       app.kubernetes.io/name: clickhouse
@@ -52,10 +42,6 @@ spec:
         app.kubernetes.io/part-of: plausible
     spec:
       restartPolicy: Always
-      volumes:
-        - name: clickhousedata
-          persistentVolumeClaim:
-            claimName: plausible-db-pvc
       containers:
         - name: plausible-events-db
           image: yandex/clickhouse-server:latest
@@ -63,7 +49,7 @@ spec:
           ports:
             - containerPort: 8123
           volumeMounts:
-            - name: clickhousedata
+            - name: data
               mountPath: /var/lib/clickhouse
           env:
             - name: CLICKHOUSE_DB
@@ -101,3 +87,17 @@ spec:
             initialDelaySeconds: 30
             failureThreshold: 3
             periodSeconds: 10
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app.kubernetes.io/name: clickhouse
+          app.kubernetes.io/component: database
+          app.kubernetes.io/part-of: plausible
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 128Mi
+          limits:
+            storage: 20Gi
