@@ -18,6 +18,36 @@ spec:
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: plausible
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: plausible-events-db-config
+data:
+  clickhouse-config.xml: |
+    <yandex>
+        <logger>
+            <level>warning</level>
+            <console>true</console>
+        </logger>
+
+        <!-- Stop all the unnecessary logging -->
+        <query_thread_log remove="remove"/>
+        <query_log remove="remove"/>
+        <text_log remove="remove"/>
+        <trace_log remove="remove"/>
+        <metric_log remove="remove"/>
+        <asynchronous_metric_log remove="remove"/>
+    </yandex>
+  clickhouse-user-config.xml: |
+    <yandex>
+        <profiles>
+            <default>
+                <log_queries>0</log_queries>
+                <log_query_threads>0</log_query_threads>
+            </default>
+        </profiles>
+    </yandex>
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -42,6 +72,11 @@ spec:
         app.kubernetes.io/part-of: plausible
     spec:
       restartPolicy: Always
+      # see https://github.com/ClickHouse/ClickHouse/blob/master/docker/server/Dockerfile
+      securityContext:
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
       containers:
         - name: plausible-events-db
           image: yandex/clickhouse-server:latest
@@ -51,6 +86,14 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/clickhouse
+            - name: config
+              mountPath: /etc/clickhouse-server/config.d/logging.xml
+              subPath: clickhouse-config.xml
+              readOnly: true
+            - name: config
+              mountPath: /etc/clickhouse-server/users.d/logging.xml"
+              subPath: clickhouse-user-config.xml
+              readOnly: true
           env:
             - name: CLICKHOUSE_DB
               value: plausible
@@ -87,6 +130,10 @@ spec:
             initialDelaySeconds: 30
             failureThreshold: 3
             periodSeconds: 10
+      volumes:
+        - name: config
+          configMap:
+            name: plausible-events-db-config
   volumeClaimTemplates:
     - metadata:
         name: data

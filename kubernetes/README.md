@@ -34,5 +34,5 @@ When you first log in with your admin credentials, you will be prompted to enter
 Otherwise, run this command to verify all users in the database:
 
 ```bash
-kubectl -n plausible exec deploy/plausible-db -- /bin/bash -c 'psql -U $POSTGRES_USER -d $POSTGRES_DB -c "UPDATE users SET email_verified = true;"'
+kubectl -n plausible exec statefulset/plausible-db -- /bin/bash -c 'psql -U $POSTGRES_USER -d $POSTGRES_DB -c "UPDATE users SET email_verified = true;"'
 ```

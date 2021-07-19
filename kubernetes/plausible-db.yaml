@@ -42,6 +42,11 @@ spec:
         app.kubernetes.io/part-of: plausible
     spec:
       restartPolicy: Always
+      # see https://github.com/docker-library/postgres/blob/6bbf1c7b308d1c4288251d73c37f6caf75f8a3d4/14/buster/Dockerfile
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
       containers:
         - name: plausible-db
           image: postgres:latest
