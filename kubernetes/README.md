@@ -21,7 +21,7 @@ Once you've entered your secret key base, base url and admin credentials, you're
 
 ```bash
 kubectl create namespace plausible # Create a new namespace for all resources
-kubectl -n plausible create configmap plausible-config --from-env-file=plausible-conf.env # Create a configmap from the plausible-conf.env file
+kubectl -n plausible create secret generic plausible-config --from-env-file=plausible-conf.env # Create a configmap from the plausible-conf.env file
 # Please change the Postgres and Clickhouse passwords to something more secure here!
 kubectl -n plausible create secret generic plausible-db-user --from-literal='username=postgres' --from-literal='password=postgres' # Create the Postgres user
 kubectl -n plausible create secret generic plausible-events-db-user --from-literal='username=clickhouse' --from-literal='password=clickhouse' # Create the Clickhouse user

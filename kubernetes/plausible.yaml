@@ -50,7 +50,7 @@ spec:
           args:
             - sleep 30 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh db init-admin
           envFrom:
-            - configMapRef:
+            - secretRef:
                 name: plausible-config
           env:
             - name: POSTGRES_USER
@@ -95,7 +95,7 @@ spec:
           ports:
             - containerPort: 8000
           envFrom:
-            - configMapRef:
+            - secretRef:
                 name: plausible-config
           env:
             - name: POSTGRES_USER
