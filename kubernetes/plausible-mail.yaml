@@ -15,7 +15,7 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: smtp
-    app.kubernetes.io/component: database
+    app.kubernetes.io/component: email
     app.kubernetes.io/part-of: plausible
 ---
 apiVersion: apps/v1
