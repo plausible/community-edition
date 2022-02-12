@@ -1,8 +1,5 @@
 version: "3.3"
 services:
-  mail:
-    image: bytemark/smtp
-    restart: always
 
   plausible_db:
     image: postgres:12
@@ -31,7 +28,6 @@ services:
     depends_on:
       - plausible_db
       - plausible_events_db
-      - mail
     ports:
       - 8000:8000
     env_file:
