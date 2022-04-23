@@ -1,6 +1,6 @@
 # Plausible Analytics setup examples
 
-This repository acts as a a template to get up and running with [Plausible Analytics](https://github.com/plausible/analytics).
+This repository acts as a template to get up and running with [Plausible Analytics](https://github.com/plausible/analytics).
 
 ### How to use
 
