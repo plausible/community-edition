@@ -1,18 +1,14 @@
-version: "3.3"
 services:
-  mail:
-    image: bytemark/smtp
-    restart: always
-
   plausible_db:
+    container_name: plausible_db
     image: postgres:12
     restart: always
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
-
   plausible_events_db:
+    container_name: plausible_event_db
     image: yandex/clickhouse-server:21.3.2.5
     restart: always
     volumes:
@@ -23,24 +19,18 @@ services:
       nofile:
         soft: 262144
         hard: 262144
-
   plausible:
-    image: plausible/analytics:latest
+    container_name: plausible_app
+    image: plausible/analytics:v1
     restart: always
     command: sh -c "sleep 10 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh db init-admin && /entrypoint.sh run"
     depends_on:
       - plausible_db
       - plausible_events_db
-      - mail
     ports:
       - 8000:8000
     env_file:
       - plausible-conf.env
-
 volumes:
   db-data:
-    driver: local
   event-data:
-    driver: local
-  geoip:
-    driver: local
