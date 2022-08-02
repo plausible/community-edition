@@ -1,6 +1,8 @@
 # How to deploy
 
 This deployment uses docker-stack-deploy to make secret and configuration management easier. See https://github.com/neuroforgede/docker-stack-deploy.
+The plausible.yml file as in this repository makes use of Hetzner Cloud Volumes using [costela/docker-volume-hetzner](https://github.com/costela/docker-volume-hetzner) (see https://github.com/neuroforgede/swarmsible/tree/master/environments/test/test-swarm/stacks/00_hetzner-volumes for a way to deploy the plugin). If you are using a different vendor, you will have to modify the
+volume configs.
 
 This assumes you have a Docker swarm running. Once set up, you will need a
 traefik instance configured to work with constraint `traefik-public` and a network `traefik-public`.
