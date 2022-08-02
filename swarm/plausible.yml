@@ -1,0 +1,162 @@
+version: "3.3"
+services:
+  mail:
+    image: bytemark/smtp
+    networks:
+      - plausible_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  plausible_db:
+    image: postgres:12
+    networks:
+      plausible_network:
+        aliases:
+          - postgres.plausible.local
+    volumes:
+      - db-data:/data/postgres
+    environment:
+      - POSTGRES_PASSWORD=<postgres-password>
+      - PGDATA=/data/postgres/pgdata
+      - POSTGRES_USER=plausible
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: 
+          - node.labels.hetzner_location == nbg1
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 2048M
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+
+  plausible_events_db:
+    image: clickhouse/clickhouse-server:22.5.3.21
+    networks:
+      - plausible_network
+    configs:
+      - source: clickhouse_config_xml
+        target: /etc/clickhouse-server/config.d/logging.xml
+        uid: "1000"
+        gid: "1000"
+        mode: 0444
+      - source: clickhouse_user_config_xml
+        target: /etc/clickhouse-server/users.d/logging.xml
+        uid: "1000"
+        gid: "1000"
+        mode: 0444
+    volumes:
+      - event-data:/var/lib/clickhouse
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: 
+          - node.labels.hetzner_location == nbg1
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 2048M
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+
+  plausible_init:
+    image: plausible/analytics:v1.4.4
+    command: sh -c "source /var/run/secrets/plausible_env && sleep 10 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh db init-admin"   
+    secrets:
+      - source: plausible_env
+        target: plausible_env
+        uid: '1000'
+        gid: '1000'
+        mode: 0400
+    networks:
+      - plausible_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: "none"
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  plausible:
+    image: plausible/analytics:v1.4.4
+    command: sh -c "source /var/run/secrets/plausible_env && exec /entrypoint.sh run"   
+    secrets:
+      - source: plausible_env
+        target: plausible_env
+        uid: '1000'
+        gid: '1000'
+        mode: 0400
+    networks:
+      - plausible_network
+      - traefik-public
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 2048M
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+      placement:
+        constraints: 
+          - node.labels.hetzner_location == nbg1
+      
+      labels:
+        - "traefik.docker.network=traefik-public"
+
+        - "traefik.enable=true"
+        - "traefik.http.routers.plausible-frontend.rule=Host(`<base-domain>`)"
+        - "traefik.http.routers.plausible-frontend.entrypoints=http"
+        - "traefik.http.services.plausible-frontend.loadbalancer.server.port=8000"
+        - "traefik.http.routers.plausible-frontend.service=plausible-frontend"
+
+        - "traefik.constraint-label=traefik-public"
+
+secrets:
+  plausible_env: 
+    file: ./secrets/plausible_analytics/plausible-conf.env
+
+configs:
+  clickhouse_config_xml:
+    file: ./configs/clickhouse/clickhouse-config.xml
+
+  clickhouse_user_config_xml:
+    file: ./configs/clickhouse/clickhouse-user-config.xml
+
+
+networks:
+  plausible_network:
+    driver: overlay
+    attachable: true
+    driver_opts:
+      encrypted: ""
+  traefik-public:
+    external: true
+
+volumes:
+  db-data:
+    driver: hetzner-volume
+    driver_opts:
+      size: '20'
+      fstype: ext4
+  event-data:
+    driver: hetzner-volume
+    driver_opts:
+      size: '20'
+      fstype: ext4
+  geoip:
+    driver: hetzner-volume
+    driver_opts:
+      size: '20'
+      fstype: ext4
