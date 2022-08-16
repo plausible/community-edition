@@ -14,4 +14,4 @@ something could be improved.
 
 ### Infrastructure model
 
-![Insfrastructure model](.infragenie/infrastructure_model.png)
+![Infrastructure model](.infragenie/infrastructure_model.png)
