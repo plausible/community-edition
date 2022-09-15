@@ -66,7 +66,7 @@ services:
           memory: 512M
 
   plausible_init:
-    image: plausible/analytics:v1.4.4
+    image: plausible/analytics:stable
     command: sh -c "source /var/run/secrets/plausible_env && sleep 10 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh db init-admin"   
     secrets:
       - source: plausible_env
@@ -87,7 +87,7 @@ services:
           memory: 512M
 
   plausible:
-    image: plausible/analytics:v1.4.4
+    image: plausible/analytics:stable
     command: sh -c "source /var/run/secrets/plausible_env && exec /entrypoint.sh run"   
     secrets:
       - source: plausible_env
