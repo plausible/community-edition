@@ -5,6 +5,7 @@ services:
     restart: always
 
   plausible_db:
+    # supported versions are 12, 13, and 14
     image: postgres:14-alpine
     restart: always
     volumes:
