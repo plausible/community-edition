@@ -49,6 +49,7 @@ spec:
         fsGroup: 999
       containers:
         - name: plausible-db
+          # supported versions are 12, 13, and 14
           image: postgres:latest
           imagePullPolicy: Always
           ports:
