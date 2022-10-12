@@ -91,7 +91,7 @@ spec:
               subPath: clickhouse-config.xml
               readOnly: true
             - name: config
-              mountPath: /etc/clickhouse-server/users.d/logging.xml"
+              mountPath: /etc/clickhouse-server/users.d/logging.xml
               subPath: clickhouse-user-config.xml
               readOnly: true
           env:
