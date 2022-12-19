@@ -28,9 +28,12 @@ kubectl -n plausible create secret generic plausible-events-db-user --from-liter
 kubectl -n plausible apply -f ./kubernetes
 ```
 
-You can now navigate to http://{hostname}:8000 and see the login screen.
+You can now navigate to http://{hostname}:8000 and see the registration screen for the admin user.
 
-When you first log in with your admin credentials, you will be prompted to enter a verification code which has been sent to your email. Please configure your server for SMTP to receive this email. [Here are Plausible's SMTP configuration options](https://plausible.io/docs/self-hosting-configuration#mailersmtp-setup).
+## 4. (Optional) Email verification
+
+If you've enabled email verification with `ENABLE_EMAIL_VERIFICATION=true`, you will be prompted to enter a verification code which has been sent to your email. Please configure your server for SMTP to receive this email. [Here are Plausible's SMTP configuration options](https://plausible.io/docs/self-hosting-configuration#mailersmtp-setup).
+
 Otherwise, run this command to verify all users in the database:
 
 ```bash
