@@ -17,7 +17,7 @@ Like the original self hosting guide configure your server in the `plausible-con
 
 ## 3. Deploy the server
 
-Once you've entered your secret key base, base url and admin credentials, you're ready to deploy the server:
+Once you've entered your secret key base and base url, you're ready to deploy the server:
 
 ```bash
 kubectl create namespace plausible # Create a new namespace for all resources
