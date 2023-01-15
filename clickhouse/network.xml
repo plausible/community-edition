@@ -1,0 +1,4 @@
+<clickhouse>
+    <listen_host>0.0.0.0</listen_host>
+    <keep_alive_timeout>10</keep_alive_timeout>
+</clickhouse>
