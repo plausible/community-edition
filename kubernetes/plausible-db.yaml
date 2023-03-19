@@ -42,15 +42,16 @@ spec:
         app.kubernetes.io/part-of: plausible
     spec:
       restartPolicy: Always
-      # see https://github.com/docker-library/postgres/blob/6bbf1c7b308d1c4288251d73c37f6caf75f8a3d4/14/buster/Dockerfile
+      # 70 is the standard UID/GID for "postgres" in Alpine.
+      # See  https://github.com/docker-library/postgres/blob/156d0659d047578f06aa8785cf12d547c6a5ccfd/14/alpine/Dockerfile#L9
       securityContext:
-        runAsUser: 999
-        runAsGroup: 999
-        fsGroup: 999
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
       containers:
         - name: plausible-db
-          # supported versions are 12, 13, and 14
-          image: postgres:latest
+          # Postgres v14 is recommended
+          image: postgres:14-alpine
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
