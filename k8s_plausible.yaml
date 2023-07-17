@@ -1,0 +1,269 @@
+# TODO
+# - modify CHANGE_ME values
+# - rotate postgres password
+# - rotate plausible secret key base
+
+# postgres for plausible
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: plausible-postgres
+  namespace: CHANGE_ME
+spec:
+  selector:
+    matchLabels:
+      app: plausible-postgres
+  serviceName: "plausible-postgres"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: plausible-postgres
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: plausible-postgres
+        image: postgres:14-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+        - name: POSTGRES_DB
+          value: "plausible"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/pgdata
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: postgres-data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      # Replace with your storage class
+      storageClassName: "CHANGE_ME"
+      resources:
+        requests:
+          storage: 10Gi
+---
+#postgres service
+apiVersion: v1
+kind: Service
+metadata:
+  name: plausible-postgres
+  namespace: CHANGE_ME
+spec:
+  selector:
+    app: plausible-postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+    name: postgres
+---
+# clickhouse config files
+apiVersion: v1
+data:
+  clickhouse-config.xml: |
+    <clickhouse>
+        <listen_host>0.0.0.0</listen_host>
+        <logger>
+            <level>warning</level>
+            <console>true</console>
+        </logger>
+
+        <!-- Stop all the unnecessary logging -->
+        <query_thread_log remove="remove"/>
+        <query_log remove="remove"/>
+        <text_log remove="remove"/>
+        <trace_log remove="remove"/>
+        <metric_log remove="remove"/>
+        <asynchronous_metric_log remove="remove"/>
+        <session_log remove="remove"/>
+        <part_log remove="remove"/>
+    </clickhouse>
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: clickhouse-config
+  namespace: CHANGE_ME
+---
+apiVersion: v1
+data:
+  clickhouse-user-config.xml: |
+    <clickhouse>
+        <profiles>
+            <default>
+                <log_queries>0</log_queries>
+                <log_query_threads>0</log_query_threads>
+            </default>
+        </profiles>
+    </clickhouse>
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: clickhouse-user-config
+  namespace: CHANGE_ME
+---
+# clickhouse event store
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: plausible-clickhouse
+  namespace: CHANGE_ME
+spec:
+  selector:
+    matchLabels:
+      app: plausible-clickhouse
+  serviceName: "plausible-clickhouse"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: plausible-clickhouse
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: plausible-clickhouse
+        image: clickhouse/clickhouse-server:22.8.13.20-alpine
+        ports:
+        - containerPort: 8123
+          name: clickhouse
+        volumeMounts:
+        - name: clickhouse-data
+          mountPath: /var/lib/clickhouse
+        - name: clickhouse-config
+          mountPath: /etc/clickhouse-server/config.d
+          readOnly: true
+        - name: clickhouse-user-config
+          mountPath: /etc/clickhouse-server/users.d
+          readOnly: true
+      volumes:
+      - name: clickhouse-data
+        persistentVolumeClaim:
+          claimName: clickhouse-data
+      - name: clickhouse-config
+        configMap:
+          name: clickhouse-config
+      - name: clickhouse-user-config
+        configMap:
+          name: clickhouse-user-config
+  volumeClaimTemplates:
+  - metadata:
+      name: clickhouse-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      # Replace with your storage class
+      storageClassName: "CHANGE_ME"
+      resources:
+        requests:
+          storage: 10Gi
+---
+# clickhouse service
+apiVersion: v1
+kind: Service
+metadata:
+  name: plausible-clickhouse
+  namespace: CHANGE_ME
+spec:
+  selector:
+    app: plausible-clickhouse
+  ports:
+  - port: 8123
+    targetPort: 8123
+    name: clickhouse
+---
+# plausible app
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plausible
+  namespace: CHANGE_ME
+  labels:
+    app: plausible
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plausible
+  template:
+    metadata:
+      labels:
+        app: plausible
+    spec:
+      containers:
+      - name: plausible
+        image: plausible/analytics:v1.5
+        command: ["sh", "-c", "sleep 10 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh run"]
+        ports:
+        - containerPort: 8000
+          name: plausible
+        env:
+        - name: BASE_URL
+        # Replace with the base url of your plausible instance
+          value: "CHANGE_ME"
+        - name: SECRET_KEY_BASE
+        # Replace with a random string
+          value: "CHANGE_ME"
+        - name: DATABASE_URL
+        # if you changed the postgres password, change it here too
+          value: "postgres://postgres:postgres@plausible-postgres:5432/plausible"
+        - name: CLICKHOUSE_DATABASE_URL
+          value: "http://plausible-clickhouse:8123/plausible"
+---
+# plausible service
+apiVersion: v1
+kind: Service
+metadata:
+  name: plausible
+  namespace: CHANGE_ME
+spec:
+  selector:
+    app: plausible
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: plausible
+---
+# plausible ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: plausible
+  namespace: CHANGE_ME
+spec:
+  rules:
+  # Replace with the domain of your plausible instance
+  - host: CHANGE_ME
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: plausible
+            port:
+              number: 8000
+  tls:
+  - hosts:
+  # Replace with the domain of your plausible instance
+    - CHANGE_ME
+    secretName: plausible-tls
+---
+# plausible cert
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: plausible-tls
+  namespace: CHANGE_ME
+spec:
+  secretName: plausible-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  dnsNames:
+  # Replace with the domain of your plausible instance
+  - CHANGE_ME
