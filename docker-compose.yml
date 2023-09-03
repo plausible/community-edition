@@ -11,7 +11,8 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=postgres
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=postgres"
 
   plausible_events_db:
     image: clickhouse/clickhouse-server:23.3.7.5-alpine
