@@ -9,7 +9,7 @@ services:
     image: postgres:14-alpine
     restart: always
     volumes:
-      - ./db-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
     healthcheck:
@@ -22,7 +22,7 @@ services:
     image: clickhouse/clickhouse-server:23.3.7.5-alpine
     restart: always
     volumes:
-      - ./event-data:/var/lib/clickhouse
+      - event-data:/var/lib/clickhouse
       - ./clickhouse/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml:ro
       - ./clickhouse/clickhouse-user-config.xml:/etc/clickhouse-server/users.d/logging.xml:ro
     ulimits:
@@ -47,3 +47,9 @@ services:
       - 8000:8000
     env_file:
       - plausible-conf.env
+
+volumes:
+  db-data:
+    driver: local
+  event-data:
+    driver: local
