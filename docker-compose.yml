@@ -14,6 +14,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
 
   plausible_events_db:
     image: clickhouse/clickhouse-server:23.3.7.5-alpine
@@ -28,6 +29,7 @@ services:
         hard: 262144
     healthcheck:
       test: ["CMD", "clickhouse-client", "-q", "SELECT 1"]
+      interval: 5s
 
   plausible:
     image: plausible/analytics:v2.0
