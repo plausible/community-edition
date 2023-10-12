@@ -6,57 +6,39 @@ Guide to upgrading PostgreSQL version `>= 12` to version `14` using `pg_dump` an
 
 ### Plan
 
-1. dump contents of the old version PostgreSQL to a file in a mounted volume
+1. dump contents of the old version PostgreSQL to a file
+1. copy the dump to the host
 1. replace old version PostgreSQL with new version PostgreSQL
-1. load dump from the mounted volume into new version PostgreSQL
+1. copy and load the dump into new version PostgreSQL
 
 ---
 
 ### Steps
 
-1. Add a backup volume to `plausible_db` in your `docker-compose.yml`
-
-```diff
-  plausible_db:
-    image: postgres:12
-    restart: always
-    volumes:
-      - db-data:/var/lib/postgresql/data
-+     - ./backup:/backup
-    environment:
-      - POSTGRES_PASSWORD=postgres
-```
-
-2. Stop relevant containers to avoid writing to old `plausible_db`
+1. Stop `plausible` to avoid writing to old `plausible_db`
 
 ```console
-> docker compose stop plausible plausible_db
+> docker compose stop plausible
 [+] Running 2/2
  ⠿ Container hosting-plausible-1     Stopped           6.5s
- ⠿ Container hosting-plausible_db-1  Stopped           0.2s
 ```
 
-3. Restart `plausible_db` container to attach volume
+2. Dump old `plausible_db` contents to a backup file
 
 ```console
-> docker compose up plausible_db -d
-[+] Running 1/1
- ⠿ Container hosting-plausible_db-1  Started           0.3s
+> docker compose exec plausible_db sh -c "pg_dump -U postgres plausible_db > plausible_db.bak"
 ```
 
-4. Dump old `plausible_db` contents to a backup file
+3. Copy the backup to the host
 
 ```console
-> docker compose exec plausible_db sh -c "pg_dump -U postgres plausible_db > /backup/plausible_db.bak"
+> docker compose cp plausible_db:plausible_db.bak plausible_db.bak
 ```
 
-5. (Optional) verify backup went OK
+4. (Optional) verify backup went OK
 
 ```console
-> ls backup
-plausible_db.bak
-
-> head backup/plausible_db.bak
+> head plausible_db.bak
 --
 -- PostgreSQL database dump
 --
@@ -69,7 +51,7 @@ SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
 ```
 
-6. Edit `docker-compose.yml` to use new PostgreSQL version, here we update from `v12` to `v14`, alpine flavour.
+5. Edit `docker-compose.yml` to use new PostgreSQL version, here we update from `v12` to `v14`, alpine flavour.
 
 ```diff
   plausible_db:
@@ -78,12 +60,11 @@ SET idle_in_transaction_session_timeout = 0;
     restart: always
     volumes:
       - db-data:/var/lib/postgresql/data
-      - ./backup:/backup
     environment:
       - POSTGRES_PASSWORD=postgres
 ```
 
-7. Ensure relevant containers are stopped
+6. Ensure relevant containers are stopped
 
 ```console
 > docker compose stop plausible plausible_db
@@ -92,7 +73,7 @@ SET idle_in_transaction_session_timeout = 0;
  ⠿ Container hosting-plausible_db-1  Stopped           0.2s
 ```
 
-8. Remove old `plausible_db` container to be able to nuke its volume in the next step
+7. Remove old `plausible_db` container to be able to nuke its volume in the next step
 
 ```console
 > docker compose rm plausible_db
@@ -101,7 +82,7 @@ SET idle_in_transaction_session_timeout = 0;
  ⠿ Container hosting-plausible_db-1  Removed           0.0s
 ```
 
-9. Remove old `plausible_db` volume, mine is named `hosting_db-data`
+8. Remove old `plausible_db` volume, mine is named `hosting_db-data`
 
 ```console
 > docker volume ls
@@ -115,7 +96,7 @@ local     hosting_event-data
 hosting_db-data
 ```
 
-10. Start new version `plausible_db` container
+9. Start new version `plausible_db` container
 
 ```console
 > docker compose up plausible_db -d
@@ -134,12 +115,13 @@ hosting_db-data
  ⠿ Container hosting-plausible_db-1  Started           0.5s
 ```
 
-11. Create new DB and load data into it
+10. Create new DB and load data into it
 
 ```console
 > docker compose exec plausible_db createdb -U postgres plausible_db
+> docker compose cp plausible_db.bak plausible_db:plausible_db.bak
 
-> docker compose exec plausible_db sh -c "psql -U postgres -d plausible_db < /backup/plausible_db.bak"
+> docker compose exec plausible_db sh -c "psql -U postgres -d plausible_db < plausible_db.bak"
 SET
 SET
 SET
@@ -158,7 +140,7 @@ CREATE EXTENSION
 <...snip...>
 ```
 
-12. Start all other containers
+11. Start all other containers
 
 ```console
 > docker compose up -d
@@ -169,19 +151,9 @@ CREATE EXTENSION
  ⠿ Container hosting-plausible-1            Started           0.5s
 ```
 
-13. (Optional) Remove backups from `docker-compose.yml` and your filesystem
+12. (Optional) Remove backups from the container and the host
 
-```diff
-  plausible_db:
-    image: postgres:14-alpine
-    restart: always
-    volumes:
-      - db-data:/var/lib/postgresql/data
--     - ./backup:/backup
-    environment:
-      - POSTGRES_PASSWORD=postgres
-```
-
-```
-> rm -rf ./backup
+```console
+> rm plausible_db.bak
+> docker compose exec plausible_db rm plausible_db.bak
 ```
