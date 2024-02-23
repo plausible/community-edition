@@ -44,19 +44,20 @@ To make your Plausible CE instance accessible on a (sub)domain, you also need to
 
 ### Quick start
 
-To get started quickly, clone the [plausible/hosting](https://github.com/plausible/hosting) repo. It has everything you need to boot up your own Plausible CE server.
+To get started quickly, clone the [plausible/community-edition](https://github.com/plausible/community-edition) repo. It has everything you need to boot up your own Plausible CE server.
 
 <sub><kbd>console</kbd></sub>
 ```console
-$ git clone https://github.com/plausible/hosting
-Cloning into 'hosting'...
+$ mkdir hosting
+$ cd hosting
+$ git clone https://github.com/plausible/community-edition .
+Cloning into 'community-edition'...
 remote: Enumerating objects: 280, done.
 remote: Counting objects: 100% (146/146), done.
 remote: Compressing objects: 100% (74/74), done.
 remote: Total 280 (delta 106), reused 86 (delta 71), pack-reused 134
 Receiving objects: 100% (280/280), 69.44 KiB | 7.71 MiB/s, done.
 Resolving deltas: 100% (136/136), done.
-$ cd hosting
 ```
 
 In the downloaded directory you'll find two important files:
