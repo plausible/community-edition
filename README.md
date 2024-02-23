@@ -58,6 +58,8 @@ remote: Compressing objects: 100% (74/74), done.
 remote: Total 280 (delta 106), reused 86 (delta 71), pack-reused 134
 Receiving objects: 100% (280/280), 69.44 KiB | 7.71 MiB/s, done.
 Resolving deltas: 100% (136/136), done.
+$ ls
+README.md           clickhouse/         docker-compose.yml  images/             plausible-conf.env  reverse-proxy/      upgrade/
 ```
 
 In the downloaded directory you'll find two important files:
