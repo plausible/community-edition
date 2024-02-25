@@ -64,25 +64,28 @@ README.md           clickhouse/         docker-compose.yml  images/             
 
 In the downloaded directory you'll find two important files:
 
-- [`docker-compose.yml`](https://github.com/plausible/hosting/blob/master/docker-compose.yml) - installs and orchestrates networking between your Plausible CE server, Postgres database, Clickhouse database (for stats), and an SMTP server.
-- [`plausible-conf.env`](https://github.com/plausible/hosting/blob/master/plausible-conf.env) - configures the Plausible server itself. Full configuration options are documented [below.](#configure)
+- [`docker-compose.yml`](https://github.com/plausible/community-edition/blob/master/docker-compose.yml) - installs and orchestrates networking between your Plausible CE server, Postgres database, Clickhouse database (for stats), and an SMTP server.
+- [`plausible-conf.env`](https://github.com/plausible/community-edition/blob/master/plausible-conf.env) - configures the Plausible server itself. Full configuration options are documented [below.](#configure)
 
 Right now the latter looks like this:
 
-<sub><kbd>[plausible-conf.env](https://github.com/plausible/hosting/blob/master/plausible-conf.env)</kbd></sub>
+<sub><kbd>[plausible-conf.env](https://github.com/plausible/community-edition/blob/master/plausible-conf.env)</kbd></sub>
 ```env
 BASE_URL=replace-me
 SECRET_KEY_BASE=replace-me
+TOTP_VAULT_KEY=replace-me
 ```
 
 Let's do as it asks and populate these required environment variables with our own values.
 
-First we generate the [`SECRET_KEY_BASE`](#secret_key_base) using `openssl`
+First we generate the secrets for [`SECRET_KEY_BASE`](#secret_key_base) and [`TOTP_VAULT_KEY`](#totp_vault_key) using `openssl`
 
 <sub><kbd>console</kbd></sub>
 ```console
 $ openssl rand -base64 48
 GLVzDZW04FzuS1gMcmBRVhwgd4Gu9YmSl/k/TqfTUXti7FLBd7aflXeQDdwCj6Cz
+$ openssl rand -base64 32
+dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
 ```
 
 And then we decide on the [`BASE_URL`](#base_url) where the instance would be accessible. Let's assume we choose `http://plausible.example.com`
@@ -93,19 +96,21 @@ And then we decide on the [`BASE_URL`](#base_url) where the instance would be ac
 + BASE_URL=http://plausible.example.com
 - SECRET_KEY_BASE=replace-me
 + SECRET_KEY_BASE=GLVzDZW04FzuS1gMcmBRVhwgd4Gu9YmSl/k/TqfTUXti7FLBd7aflXeQDdwCj6Cz
+- TOTP_VAULT_KEY=replace-me
++ TOTP_VAULT_KEY=dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
 ```
 
 We can start our instance now but the requests would be served over HTTP. Not cool! Let's configure [Caddy](https://caddyserver.com) to enable HTTPS.
 
 <!-- TODO note about CloudFlare -->
 
-> For other reverse-proxy setups please see [reverse-proxy](https://github.com/plausible/hosting/tree/master/reverse-proxy) docs.
+> For other reverse-proxy setups please see [reverse-proxy](https://github.com/plausible/community-edition/tree/master/reverse-proxy) docs.
 
 First we need to point DNS records for `plausible.example.com` to the IP address of the instance. This is needed for Caddy to issue the TLS certificates.
 
 Then we need to let Caddy know the domain name for which to issue the TLS certificate and the service to redirect the requests to.
 
-<sub><kbd>[reverse-proxy/docker-compose.caddy-gen.yml](https://github.com/plausible/hosting/blob/master/reverse-proxy/docker-compose.caddy-gen.yml)</kbd></sub>
+<sub><kbd>[reverse-proxy/docker-compose.caddy-gen.yml](https://github.com/plausible/community-edition/blob/master/reverse-proxy/docker-compose.caddy-gen.yml)</kbd></sub>
 ```diff
   plausible:
     labels:
@@ -123,6 +128,7 @@ Finally we need to update `BASE_URL` to use `https://` scheme.
 - BASE_URL=http://plausible.example.com
 + BASE_URL=https://plausible.example.com
   SECRET_KEY_BASE=GLVzDZW04FzuS1gMcmBRVhwgd4Gu9YmSl/k/TqfTUXti7FLBd7aflXeQDdwCj6Cz
+  TOTP_VAULT_KEY=dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
 ```
 
 Now we can start everything together.
@@ -153,22 +159,20 @@ Next we'll go over how to upgrade the instance when a new release comes out, mor
 
 ## Upgrade
 
-Each new [release](https://github.com/plausible/analytics/releases/tag/v2.0.0) contains information on how to upgrade to it from the previous version. This section outlines the 
-general steps and explains the versioning.
+Each new [release](https://github.com/plausible/analytics/releases) contains information on how to upgrade to it from the previous version. This section outlines the general steps and explains the versioning.
 
 ### Version management
 
 Plausible CE follows [semantic versioning:](https://semver.org/) `MAJOR.MINOR.PATCH`
 
-You can find available Plausible versions on [DockerHub](https://hub.docker.com/r/plausible/analytics). The default `latest` tag refers to the latest stable release tag. You can also pin your version:
+You can find available Plausible versions on [Github packages.](https://github.com/plausible/analytics/pkgs/container/community-edition) The default `latest` tag refers to the latest stable release tag. You can also pin your version:
 
-- `plausible/analytics:v2` pins the major version to `2` but allows minor and patch version upgrades
-- `plausible/analytics:v2.0` pins the minor version to `2.0` but allows only patch upgrades
+- `ghcr.io/plausible/community-edition:v2` pins the major version to `2` but allows minor and patch version upgrades
+- `ghcr.io/plausible/community-edition:v2.1` pins the minor version to `2.1` but allows only patch upgrades
 
 None of the functionality is backported to older versions. If you wish to get the latest bug fixes and security updates you need to upgrade to a newer version.
 
-New versions are published on [the releases page](https://github.com/plausible/analytics/releases) and their changes are documented in our [Changelog.](https://github.com/plausible/analytics/blob/master/CHANGELOG.md) Please note that database schema changes require running migrations when you're upgrading. However, we consider the schema
-as an internal API and therefore schema changes aren't considered a breaking change.
+New versions are published on [the releases page](https://github.com/plausible/analytics/releases) and their changes are documented in our [Changelog.](https://github.com/plausible/analytics/blob/master/CHANGELOG.md) Please note that database schema changes require running migrations when you're upgrading. However, we consider the schema as an internal API and therefore schema changes aren't considered a breaking change.
 
 We recommend to pin the major version instead of using `latest`. Either way the general flow for upgrading between minor version would look like this:
 
@@ -196,14 +200,12 @@ $ docker compose -f docker-compose.yml -f reverse-proxy/docker-compose.caddy-gen
  ✔ Container hosting-plausible_db-1         Running    0.0s
  ✔ Container hosting-plausible-1            Started    1.2s
  ✔ Container caddy-gen                      Running    0.0s
-$ docker images --filter=reference='plausible/analytics:*'
-REPOSITORY            TAG       IMAGE ID       CREATED        SIZE
-plausible/analytics   v2.0      2b2735265a65   7 months ago   163MB
-plausible/analytics   v1.5      5e1e0047953a   8 months ago   130MB
-$ docker rmi 5e1e0047953a
-Untagged: plausible/analytics:v1.5
-Untagged: plausible/analytics@sha256:365124b00f103ac40ce3c64cd49a869d94f2ded221d9bb7900be1cecfaf34acf
-Deleted: sha256:5e1e0047953afc179ee884389e152b3f07343fb34e5586f9ecc2f33c6ba3bcaa
+$ docker images --filter=reference='ghcr.io/plausible/community-edition:*'
+REPOSITORY                            TAG           IMAGE ID       CREATED        SIZE
+ghcr.io/plausible/community-edition   v2.1          63f7c8708294   6 days ago     83.4MB
+ghcr.io/plausible/community-edition   v2.1.0-rc.0   2b2735265a65   7 months ago   163MB
+$ docker rmi 2b2735265a65
+Untagged: ghcr.io/plausible/community-edition:v2.1.0-rc.0
 // etc.
 ```
 
@@ -213,7 +215,7 @@ Changes in major versions would involve performing a data migration (e.g.[v2.0.0
 
 ## Configure
 
-Plausible is configured with environment variables, by default supplied via [<kbd>plausible-conf.env</kbd>](https://github.com/plausible/hosting/blob/master/plausible-conf.env) [env_file.](https://github.com/plausible/hosting/blob/bb6decee4d33ccf84eb235b6053443a01498db53/docker-compose.yml#L38-L39)
+Plausible is configured with environment variables, by default supplied via [<kbd>plausible-conf.env</kbd>](https://github.com/plausible/community-edition/blob/v2.1.0/plausible-conf.env) [env_file.](https://github.com/plausible/community-edition/blob/v2.1.0/docker-compose.yml#L38-L39)
 
 > Note that if you start a container with one set of ENV vars and then update the ENV vars and restart the container, they won't take effect due to the immutable nature of the containers. The container needs to be recreated.
 
@@ -222,6 +224,7 @@ Here's the minimal <kbd>plausible-conf.env</kbd> we got from [Quick start.](#qui
 ```env
 BASE_URL=https://plausible.example.com
 SECRET_KEY_BASE=GLVzDZW04FzuS1gMcmBRVhwgd4Gu9YmSl/k/TqfTUXti7FLBd7aflXeQDdwCj6Cz
+TOTP_VAULT_KEY=dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
 ```
 
 And here's <kbd>plausible-conf.env</kbd> with some extra configuration
@@ -229,6 +232,7 @@ And here's <kbd>plausible-conf.env</kbd> with some extra configuration
 ```env
 BASE_URL=https://plausible.example.com
 SECRET_KEY_BASE=GLVzDZW04FzuS1gMcmBRVhwgd4Gu9YmSl/k/TqfTUXti7FLBd7aflXeQDdwCj6Cz
+TOTP_VAULT_KEY=dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
 MAXMIND_LICENSE_KEY=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
 MAXMIND_EDITION=GeoLite2-City
 GOOGLE_CLIENT_ID=140927866833-002gqg48rl4iku76lbkk0qhu0i0m7bia.apps.googleusercontent.com
@@ -271,6 +275,21 @@ SECRET_KEY_BASE=GLVzDZW04FzuS1gMcmBRVhwgd4Gu9YmSl/k/TqfTUXti7FLBd7aflXeQDdwCj6Cz
 ``````
 
 > ⚠️ Don't use this exact value or someone would be able to sign a cookie with `user_id=1` and log in as the admin!
+
+#### `TOTP_VAULT_KEY`
+
+Configures the secret used for encrypting TOTP secrets at rest, doesn't have any defaults and needs to be provided in the ENV vars, can be generated with `openssl rand -base64 32`
+
+<sub><kbd>console</kbd></sub>
+```console
+$ openssl rand -base64 32
+dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
+```
+
+<sub><kbd>plausible-conf.env</kbd></sub>
+```env
+TOTP_VAULT_KEY=dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
+``````
 
 ### Optional
 
@@ -637,6 +656,10 @@ Trust our own application.
 
 <img src="./images/6-continue.png">
 
+Trust more.
+
+<img src="./images/6-sign-in-copycat.png">
+
 Allow viewing Search Console data.
 
 <img src="./images/6-view-search-console-data.png">
@@ -687,9 +710,21 @@ Trust our own application.
 
 <img src="./images/6-continue.png">
 
-Pick the view to import and then follow the Plausible directions.
+Trust more.
+
+<img src="./images/6-data-continue.png">
+
+Pick the view to import.
 
 <img src="./images/6-pick-view.png">
+
+And then follow the Plausible directions.
+
+<img src="./images/6-import-continue.png">
+
+Confirm everything's in order and start the import.
+
+<img src="./images/6-import.png">
 
 You'll receive an email once the data is imported.
 
