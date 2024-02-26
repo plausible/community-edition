@@ -5,7 +5,8 @@ services:
     restart: always
 
   plausible_db:
-    # supported versions are 13, 14, and 15
+    # Plausible v2.0.0 was tested against PostgreSQL versions 12, 13, and 14
+    # https://github.com/plausible/analytics/blob/v2.0.0/.github/workflows/elixir.yml#L16
     image: postgres:14-alpine
     restart: always
     volumes:
