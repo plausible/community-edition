@@ -88,6 +88,8 @@ $ openssl rand -base64 32
 dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
 ```
 
+> ⚠️ [`SECRET_KEY_BASE`](#secret_key_base) needs to be either Bsde16 or Base64 encoded 32 (or more) bytes and [`TOTP_VAULT_KEY`](#totp_vault_key) needs to be Base64 encoded 32 bytes.
+
 And then we decide on the [`BASE_URL`](#base_url) where the instance would be accessible. Let's assume we choose `http://plausible.example.com`
 
 <sub><kbd>plausible-conf.env</kbd></sub>
@@ -276,6 +278,8 @@ SECRET_KEY_BASE=GLVzDZW04FzuS1gMcmBRVhwgd4Gu9YmSl/k/TqfTUXti7FLBd7aflXeQDdwCj6Cz
 
 > ⚠️ Don't use this exact value or someone would be able to sign a cookie with `user_id=1` and log in as the admin!
 
+> ⚠️ [`SECRET_KEY_BASE`](#secret_key_base) needs to be either Bsde16 or Base64 encoded 32 (or more) bytes.
+
 #### `TOTP_VAULT_KEY`
 
 Configures the secret used for encrypting TOTP secrets at rest, doesn't have any defaults and needs to be provided in the ENV vars, can be generated with `openssl rand -base64 32`
@@ -290,6 +294,8 @@ dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
 ```env
 TOTP_VAULT_KEY=dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
 ``````
+
+> [`TOTP_VAULT_KEY`](#totp_vault_key) needs to be Base64 encoded 32 bytes.
 
 ### Optional
 
