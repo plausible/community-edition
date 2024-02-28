@@ -88,7 +88,7 @@ $ openssl rand -base64 32
 dsxvbn3jxDd16az2QpsX5B8O+llxjQ2SJE2i5Bzx38I=
 ```
 
-> ⚠️ [`SECRET_KEY_BASE`](#secret_key_base) needs to be either Bsde16 or Base64 encoded 32 (or more) bytes and [`TOTP_VAULT_KEY`](#totp_vault_key) needs to be Base64 encoded 32 bytes.
+> ⚠️ [`SECRET_KEY_BASE`](#secret_key_base) needs to be Base64 encoded 32 (or more) bytes and [`TOTP_VAULT_KEY`](#totp_vault_key) needs to be Base64 encoded 32 bytes.
 
 And then we decide on the [`BASE_URL`](#base_url) where the instance would be accessible. Let's assume we choose `http://plausible.example.com`
 
