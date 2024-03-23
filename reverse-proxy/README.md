@@ -38,7 +38,7 @@ $ docker-compose -f docker-compose.yml -f reverse-proxy/traefik/docker-compose.t
 Install the necessary Apache modules and restart Apache. Edit the file `reverse-proxy/apache2/plausible.conf` to contain the domain name you use for your server, then copy it into Apache's configuration folder. Enable it by creating a symlink in Apache's enabled sites folder with `a2ensite` command. Finally use Certbot to create a TLS certificate for your site:
 
 ```shell
-$ sudo a2enmod proxy proxy_http proxy_ajp remoteip headers
+$ sudo a2enmod proxy proxy_http proxy_ajp remoteip headers proxy_wstunnel
 $ sudo systemctl restart apache2
 $ sudo cp reverse-proxy/apache2/plausible.conf /etc/apache2/sites-available/
 $ sudo a2ensite plausible.conf
