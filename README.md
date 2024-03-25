@@ -97,6 +97,20 @@ And then we decide on the [`BASE_URL`](#base_url) where the instance would be ac
 
 We can start our instance now but the requests would be served over HTTP. Not cool! Let's configure [Caddy](https://caddyserver.com) to enable HTTPS.
 
+<details><summary>Don't need reverse proxy?</summary>
+
+If you're **opting out** of a reverse proxy and HTTPS, you'll need to adjust the Plausible service [configuration](https://github.com/plausible/community-edition/blob/v2.0.0/docker-compose.yml#L38) to ensure it's not limited to localhost (127.0.0.1). This change allows the service to be accessible from any network interface:
+
+<sub><kbd>[docker-compose.yml](https://github.com/plausible/community-edition/blob/v2.0.0/docker-compose.yml#L38)</kbd></sub>
+```diff
+plausible:
+  ports:
+-   - 127.0.0.1:8000:8000
++   - 8000:8000
+```
+
+</details>
+
 <!-- TODO note about CloudFlare -->
 
 > For other reverse-proxy setups please see [reverse-proxy](https://github.com/plausible/hosting/tree/master/reverse-proxy) docs.
