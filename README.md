@@ -624,7 +624,7 @@ Here's the outline of what we'll do:
 - [Integrate with Google Search](#integrate-with-google-search)
   - [Enable APIs for Google Search integration](#enable-apis-for-google-search-integration)
   - [Link it with Plausible](#link-it-with-plausible)
-- [Import historical data from Universal Analytics](#import-historical-data-from-universal-analytics)
+- [Import historical data from UA and GA4](#import-historical-data-from-ua-and-ga4)
   - [Enable APIs for exports on Google Cloud](#enable-apis-for-exports-on-google-cloud)
   - [Import into Plausible](#import-into-plausible)
 
@@ -786,7 +786,7 @@ Go to the site settings on your Plausible dashboard.
 
 <img src="./images/6-plausible-settings-pick.png">
 
-In the settings select <kbd>Search Console</kbd> and press <kbd>Continue with Google</kbd>
+In the settings select <kbd>Integrations</kbd> and press <kbd>Continue with Google</kbd>
 
 > If you see a warning instead, that means you haven't set the <kbd>GOOGLE_CLIENT_ID</kbd> and <kbd>GOOGLE_CLIENT_SECRET</kbd> environment variables [correctly.](#issue-an-oauth-client-and-key-for-that-application)
 
@@ -814,7 +814,13 @@ Pick the property from Search Console.
 
 And now we should be able to drilldown into Google search terms like on [plausible.io](https://plausible.io/plausible.io/referrers/Google?source=Google)
 
-### Import historical data from Universal Analytics
+### Import historical data from UA and GA4
+
+Exporting historical data from Google requires enabling multiple APIs:
+
+<img src="./images/6-enabled-apis.png">
+
+Gotta Catch ‘Em All!
 
 #### Enable APIs for exports on Google Cloud
 
@@ -834,13 +840,31 @@ And enable it.
 
 <img src="./images/7-analytics-reporting-api-enable.png">
 
+Now search for <kbd>Google Analytics Admin API</kbd>
+
+<img src="./images/7-analytics-admin-api-search.png">
+
+And also enable it.
+
+<img src="./images/7-analytics-admin-api-enable.png">
+
+Finally search for <kbd>Google Analytics Data API</kbd>
+
+<img src="./images/7-analytics-data-api-search.png">
+
+And enable it!
+
+<img src="./images/7-analytics-data-api-enable.png">
+
+Phew!
+
 #### Import into Plausible
 
 Go to the site settings on your Plausible dashboard.
 
 <img src="./images/6-plausible-settings-pick.png">
 
-In the <kbd>General</kbd> settings section scroll down to <kbd>Data Import from Google Analytics</kbd> and press <kbd>Continue with Google</kbd> button.
+In the <kbd>Imports & Exports</kbd> settings section press on the <kbd>Google Analytics</kbd> button.
 
 > If you see a warning instead, that means you haven't set the <kbd>GOOGLE_CLIENT_ID</kbd> and <kbd>GOOGLE_CLIENT_SECRET</kbd> environment variables [correctly.](#issue-an-oauth-client-and-key-for-that-application)
 
