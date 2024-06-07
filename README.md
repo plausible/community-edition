@@ -384,7 +384,57 @@ Plausible uses PostgreSQL for storing user data and ClickhouseDB for analytics d
 
 Default: `postgres://postgres:postgres@plausible_db:5432/plausible_db`
 
-Configures the URL for PostgreSQL database.
+Configures the URL for PostgreSQL database. **Cannot** be used to connect to Unix domain socket. See [DATABASE_SOCKET_DIR](#database_socket_dir).
+
+---
+
+#### DATABASE_SOCKET_DIR
+
+Overrides [DATABASE_URL](#database_url). Configures the socket directory to use for PostgreSQL database. Not set by default
+
+<sub><kbd>plausible-conf.env</kbd></sub>
+```env
+DATABASE_SOCKET_DIR=/run/postgresql
+```
+
+You may need to additionally specify [DATABASE_NAME](#database_name), [PGUSER](#pguser), and [PGPASSWORD](#pgpassword).
+
+---
+
+#### DATABASE_NAME
+
+Default: Current user
+
+Only relevant with [DATABASE_SOCKET_DIR](#database_socket_dir). Configures the database name to use.
+
+<sub><kbd>plausible-conf.env</kbd></sub>
+```env
+DATABASE_NAME=plausible_db
+```
+
+---
+
+#### PGUSER
+
+Default: Current user
+
+Only relevant with [DATABASE_SOCKET_DIR](#database_socket_dir). Configures the database role to use for authentication.
+
+<sub><kbd>plausible-conf.env</kbd></sub>
+```env
+PGUSER=plausible_role
+```
+
+---
+
+#### PGPASSWORD
+
+Only relevant with [DATABASE_SOCKET_DIR](#database_socket_dir). Configures the database password to use for authentication. Not set by default.
+
+<sub><kbd>plausible-conf.env</kbd></sub>
+```env
+PGPASSWORD="Correct Battery Horse Staple"
+```
 
 ---
 
