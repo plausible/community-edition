@@ -909,7 +909,7 @@ To use MaxMind you need to create an account [here.](https://www.maxmind.com/en/
 <details>
 <summary>How do I access Plausible from terminal?</summary>
 
-You can starts an Interactive Elixir session from within the `plausible` container:
+You can start an Interactive Elixir session from within the `plausible` container:
 
 <sub><kbd>console</kbd></sub>
 ```console
@@ -937,7 +937,7 @@ iex> Application.get_all_env :plausible
 <details>
 <summary>How do I access ClickHouse from terminal?</summary>
 
-You can starts a `clickhouse client` session from within the `plausible_events_db` container:
+You can start a `clickhouse client` session from within the `plausible_events_db` container:
 
 <sub><kbd>console</kbd></sub>
 ```console
@@ -975,7 +975,7 @@ $ docker compose exec plausible_events_db clickhouse client --database plausible
 <details>
 <summary>How do I access PostgreSQL from terminal?</summary>
 
-You can starts a `psql` session from within the `plausible_db` container:
+You can start a `psql` session from within the `plausible_db` container:
 
 <sub><kbd>console</kbd></sub>
 ```console
