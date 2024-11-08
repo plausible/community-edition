@@ -73,7 +73,7 @@
 1. Start the services with Docker Compose:
 
     ```console
-    $ docker compose up -d
+    $ docker-compose up -d
     ```
 
 1. Visit your instance at `$BASE_URL` and create the first user.
