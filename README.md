@@ -377,7 +377,9 @@ Configures the port to bind the listen socket for the web server.
 ### Database
 
 Plausible uses PostgreSQL for storing user data and ClickhouseDB for analytics data. Use the following variables to configure them.
-
+> [!WARNING]
+> It is recommended to have all servers run on UTC time.
+> If you do not run all servers on UTC time you can lose data based on your UTC offsite, e.g.  if your UTC zone is +10 you will not receive analytics for a new site for 10 hours.
 ---
 
 #### DATABASE_URL
