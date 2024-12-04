@@ -1,6 +1,7 @@
 *
 !compose.yml
-!clickhouse/logs.xml
+!clickhouse/clickhouse-config.xml
+!clickhouse/clickhouse-user-config.xml
 !clickhouse/ipv4-only.xml
 !README.md
 !LICENSE
