@@ -2,6 +2,7 @@
 !compose.yml
 !clickhouse/logs.xml
 !clickhouse/ipv4-only.xml
+!clickhouse/low-resources.xml
 !README.md
 !LICENSE
 !.gitignore
