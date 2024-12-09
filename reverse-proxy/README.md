@@ -45,3 +45,42 @@ $ sudo a2ensite plausible.conf
 $ sudo systemctl restart apache2
 $ sudo certbot --apache
 ```
+#### Apache2 Modsecurity
+Modsecurity block with CRS the "plain/text" used by Plausible and ".com" in headers so if you use Modsecurity as a Waff to your Apache2 configuration you will need to add some custom rules in order to not block Plausible. Here are some rules, feel free to adapt to your specific case:
+
+```shell
+# Autoriser text/plain pour la route /api/event
+SecRule REQUEST_URI "@streq /api/event" \
+    "id:1000005,phase:1,t:none,pass,nolog,ctl:requestBodyAccess=On"
+
+# Désactiver les règles spécifiques uniquement pour /api/event
+SecRule REQUEST_URI "@streq /api/event" \
+    "id:1000006,phase:1,t:none,pass,nolog,ctl:ruleRemoveById=920420,ctl:ruleRemoveById=949110"
+
+# Autoriser toutes les requêtes .com pour l'agent utilisateur Plausible
+SecRule REQUEST_HEADERS:User-Agent "@contains Plausible" \
+    "id:1000008,phase:1,t:none,pass,nolog,ctl:ruleRemoveById=920440,ctl:ruleRemoveById=949110"
+
+# Autoriser l'accès aux requêtes .com pour l'agent utilisateur Plausible
+SecRule REQUEST_URI "@contains .com" \
+    "id:1000010,phase:1,t:none,pass,nolog,ctl:ruleRemoveById=920440,ctl:ruleRemoveById=949110"
+```
+
+Save this as 
+```shell
+/etc/modsecurity/customrules/customrules.conf
+```
+
+And add those custom rules to
+```shell
+/etc/modsecurity/modsecurity.conf
+```
+Like that
+```shell
+Include /etc/modsecurity/crs/crs-setup.conf
+Include /etc/modsecurity/customrules/customrules.conf
+
+#SecRuleEngine DetectionOnly
+SecRuleEngine On
+```
+And test and adapt!
