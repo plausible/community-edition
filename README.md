@@ -83,6 +83,108 @@
 >
 > If you know someone who might [find Plausible useful](https://plausible.io/?utm_medium=Social&utm_source=GitHub&utm_campaign=readme), we'd appreciate if you'd let them know.
 
+### Troubleshooting
+
+#### Local Development Setup
+
+If you're setting up Plausible for local development or testing, you may encounter some issues. Here's how to resolve common problems:
+
+**1. SSL Certificate Error with Let's Encrypt**
+
+If you see errors like "The ACME server refuses to issue a certificate for plausible.example.com", this is because Let's Encrypt won't issue certificates for placeholder domains.
+
+For local development, use HTTP instead:
+
+```console
+$ cat > .env << 'EOF'
+BASE_URL=http://localhost:8080
+SECRET_KEY_BASE=$(openssl rand -base64 48)
+HTTP_PORT=80
+DATABASE_URL=postgres://postgres:postgres@plausible_db:5432/plausible
+CLICKHOUSE_DATABASE_URL=http://plausible_events_db:8123/plausible
+DISABLE_REGISTRATION=false
+EOF
+
+$ cat > compose.override.yml << 'EOF'
+services:
+  plausible:
+    ports:
+      - 8080:80
+EOF
+```
+
+**2. Port Already in Use**
+
+If you get "port is already allocated" errors, choose different ports:
+
+```console
+$ cat > compose.override.yml << 'EOF'
+services:
+  plausible:
+    ports:
+      - 8080:80
+EOF
+```
+
+**3. Database Connection Issues**
+
+If the service gets stuck during startup, you may need to manually create databases and run migrations:
+
+```console
+# Create databases
+$ docker compose run --rm plausible /entrypoint.sh db createdb
+
+# Run migrations
+$ docker compose run --rm plausible /entrypoint.sh db migrate
+
+# Update compose.override.yml to skip createdb and migrate steps
+$ cat > compose.override.yml << 'EOF'
+services:
+  plausible:
+    command: sh -c "/entrypoint.sh run"
+    ports:
+      - 8080:80
+EOF
+
+# Start the service
+$ docker compose up -d
+```
+
+**4. Connection Reset by Peer**
+
+If you get "connection reset by peer" when accessing the service, ensure the `HTTP_PORT` in your `.env` matches the container port (not the host port) in your `compose.override.yml`:
+
+- `.env`: `HTTP_PORT=80`
+- `compose.override.yml`: `8080:80` (host:container)
+
+After making changes, restart the service:
+
+```console
+$ docker compose down && docker compose up -d
+```
+
+Your Plausible instance should then be accessible at `http://localhost:8080`.
+
+**5. Localhost Tracking Script**
+
+When testing your Plausible instance locally, you need to add `.local` to the script URL for it to work with localhost domains:
+
+```html
+<!-- Plausible Analytics -->
+<script defer data-domain="localhost" src="http://localhost:8080/js/script.local.js"></script>
+<script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+```
+
+Or with extensions:
+
+```html
+<!-- Plausible Analytics with extensions -->
+<script defer data-domain="localhost" src="http://localhost:8080/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.local.js"></script>
+<script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+```
+
+The `.local` extension is essential for localhost development - without it, the script won't track pageviews properly on localhost domains.
+
 ### Wiki
 
 For more information on installation, upgrades, configuration, and integrations please see our [wiki.](https://github.com/plausible/community-edition/wiki)
