@@ -23,21 +23,8 @@
 1. Clone this repository:
 
     ```console
-    $ git clone -b v3.1.0 --single-branch https://github.com/plausible/community-edition plausible-ce
-    Cloning into 'plausible-ce'...
-    remote: Enumerating objects: 13, done.
-    remote: Counting objects: 100% (10/10), done.
-    remote: Compressing objects: 100% (9/9), done.
-    remote: Total 13 (delta 0), reused 7 (delta 0), pack-reused 3 (from 1)
-    Receiving objects: 100% (13/13), done.
-
-    $ cd plausible-ce
-
-    $ ls -1
-    clickhouse/
-    compose.yml
-    LICENSE
-    README.md
+     git clone -b v3.1.0 --single-branch https://github.com/plausible/community-edition plausible-ce
+     cd plausible-ce
     ```
 
 1. Create and configure your [environment](https://docs.docker.com/compose/environment-variables/) file:
