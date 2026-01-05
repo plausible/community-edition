@@ -1,6 +1,6 @@
 services:
   plausible_db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     restart: always
     volumes:
       - db-data:/var/lib/postgresql/data
@@ -11,7 +11,7 @@ services:
       start_period: 1m
 
   plausible_events_db:
-    image: clickhouse/clickhouse-server:24.12-alpine
+    image: clickhouse/clickhouse-server:25.11-alpine
     restart: always
     volumes:
       - event-data:/var/lib/clickhouse
