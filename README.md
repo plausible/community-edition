@@ -51,6 +51,9 @@ Make sure `$BASE_URL` is set to the **actual domain** where you plan to host the
 
 Also ensure `$SECRET_KEY_BASE` is set to at least a **64-byte** string.
 
+> [!TIP]
+> To evaluate CE locally, set `BASE_URL=http://localhost:8000` (or any other port on your system).
+
 #### 3. Expose Plausible server to the web with a [compose override file:](https://github.com/plausible/community-edition/wiki/compose-override)
 
 ```sh
@@ -67,6 +70,9 @@ EOF
 ```
 
 Setting `HTTP_PORT=80` and `HTTPS_PORT=443` enables automatic Let's Encrypt TLS certificate issuance. You might want to choose different values if, for example, you plan to run Plausible behind [a reverse proxy.](https://github.com/plausible/community-edition/wiki/reverse-proxy)
+
+> [!TIP]
+> To evaluate CE locally, you only need to set `HTTP_PORT` and expose it on the system port from the previous step, e.g. for `BASE_URL=http://localhost:8000` and server `HTTP_PORT=80`, `ports` override should be `- 8000:80`.
 
 #### 4. Start the services with Docker Compose:
 
