@@ -20,66 +20,61 @@
 
 ### Quick start
 
-1. Clone this repository:
+#### 1. Clone this repository
 
-    ```console
-    $ git clone -b v3.1.0 --single-branch https://github.com/plausible/community-edition plausible-ce
-    Cloning into 'plausible-ce'...
-    remote: Enumerating objects: 13, done.
-    remote: Counting objects: 100% (10/10), done.
-    remote: Compressing objects: 100% (9/9), done.
-    remote: Total 13 (delta 0), reused 7 (delta 0), pack-reused 3 (from 1)
-    Receiving objects: 100% (13/13), done.
+```console
+$ git clone -b v3.2.0 --single-branch https://github.com/plausible/community-edition plausible-ce
+Cloning into 'plausible-ce'...
 
-    $ cd plausible-ce
+$ cd plausible-ce
 
-    $ ls -1
-    clickhouse/
-    compose.yml
-    LICENSE
-    README.md
-    ```
+$ ls -1
+clickhouse/
+compose.yml
+LICENSE
+README.md
+```
 
-1. Create and configure your [environment](https://docs.docker.com/compose/environment-variables/) file:
+#### 2. Create and configure your [environment](https://docs.docker.com/compose/environment-variables/) file
 
-    ```console
-    $ touch .env
-    $ echo "BASE_URL=https://plausible.example.com" >> .env
-    $ echo "SECRET_KEY_BASE=$(openssl rand -base64 48)" >> .env
-    
-    $ cat .env
-    BASE_URL=https://plausible.example.com
-    SECRET_KEY_BASE=As0fZsJlUpuFYSthRjT5Yflg/NlxkFKPRro72xMLXF8yInZ60s6xGGXYVqml+XN1
-    ```
+```console
+$ touch .env
+$ echo "BASE_URL=https://plausible.example.com" >> .env
+$ echo "SECRET_KEY_BASE=$(openssl rand -base64 48)" >> .env
 
-    Make sure `$BASE_URL` is set to the **actual domain** where you plan to host the service. The domain must have a DNS entry pointing to your server for proper resolution and automatic Let's Encrypt TLS certificate issuance. More on that in the next step.
+$ cat .env
+BASE_URL=https://plausible.example.com
+SECRET_KEY_BASE=As0fZsJlUpuFYSthRjT5Yflg/NlxkFKPRro72xMLXF8yInZ60s6xGGXYVqml+XN1
+```
 
-   Also ensure `$SECRET_KEY_BASE` is set to at least a **64-byte** string.
+Make sure `$BASE_URL` is set to the **actual domain** where you plan to host the service. The domain must have a DNS entry pointing to your server for proper resolution and automatic Let's Encrypt TLS certificate issuance. More on that in the next step.
 
-1. Expose Plausible server to the web with a [compose override file:](https://github.com/plausible/community-edition/wiki/compose-override)
+Also ensure `$SECRET_KEY_BASE` is set to at least a **64-byte** string.
 
-    ```sh
-    $ echo "HTTP_PORT=80" >> .env
-    $ echo "HTTPS_PORT=443" >> .env
+#### 3. Expose Plausible server to the web with a [compose override file:](https://github.com/plausible/community-edition/wiki/compose-override)
 
-    $ cat > compose.override.yml << EOF
-    services:
-      plausible:
-        ports:
-          - 80:80
-          - 443:443
-    EOF 
-    ```
+```sh
+$ echo "HTTP_PORT=80" >> .env
+$ echo "HTTPS_PORT=443" >> .env
 
-    Setting `HTTP_PORT=80` and `HTTPS_PORT=443` enables automatic Let's Encrypt TLS certificate issuance. You might want to choose different values if, for example, you plan to run Plausible behind [a reverse proxy.](https://github.com/plausible/community-edition/wiki/reverse-proxy)
+$ cat > compose.override.yml << EOF
+services:
+    plausible:
+    ports:
+        - 80:80
+        - 443:443
+EOF
+```
 
-1. Start the services with Docker Compose:
+Setting `HTTP_PORT=80` and `HTTPS_PORT=443` enables automatic Let's Encrypt TLS certificate issuance. You might want to choose different values if, for example, you plan to run Plausible behind [a reverse proxy.](https://github.com/plausible/community-edition/wiki/reverse-proxy)
 
-    ```console
-    $ docker compose up -d
-    ```
+#### 4. Start the services with Docker Compose:
 
-1. Visit your instance at `$BASE_URL` and create the first user.
+```console
+$ docker compose up -d
+```
+
+#### 5. Visit your instance at `$BASE_URL` and create the first user.
 
 > [!NOTE]
 > Plausible CE is funded by our cloud subscribers.
