@@ -44,7 +44,7 @@ $ echo "SECRET_KEY_BASE=$(openssl rand -base64 48)" >> .env
 
 $ cat .env
 BASE_URL=https://plausible.example.com
-SECRET_KEY_BASE=As0fZsJlUpuFYSthRjT5Yflg/NlxkFKPRro72xMLXF8yInZ60s6xGGXYVqml+XN1
+SECRET_KEY_BASE=...unique secret key base...
 ```
 
 Make sure `$BASE_URL` is set to the **actual domain** where you plan to host the service. The domain must have a DNS entry pointing to your server for proper resolution and automatic Let's Encrypt TLS certificate issuance. More on that in the next step.
@@ -63,9 +63,9 @@ $ echo "HTTPS_PORT=443" >> .env
 $ cat > compose.override.yml << EOF
 services:
     plausible:
-    ports:
-        - 80:80
-        - 443:443
+        ports:
+            - 80:80
+            - 443:443
 EOF
 ```
 
