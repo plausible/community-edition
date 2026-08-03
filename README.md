@@ -10,6 +10,14 @@
     A getting started guide to self-hosting <a href="https://plausible.io/blog/community-edition">Plausible Community Edition</a>
 </p>
 
+<p align="center">
+    <a href="https://zenith.hosting/host/plausible"><img alt="Deploy with Zenith" src="https://cdn.zenith.hosting/buttons/deploy-with-zenith.svg" height="40"></a>
+</p>
+
+<p align="center">
+    Rather not run the server yourself? One-click managed CE hosting, with a share of every subscription going back to Plausible.
+</p>
+
 ---
 
 ### Prerequisites
