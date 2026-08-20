@@ -25,4 +25,5 @@
     <trace_log remove="remove" />
     <session_log remove="remove" />
     <part_log remove="remove" />
+    <processors_profile_log remove="remove" />
 </clickhouse>
