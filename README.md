@@ -23,7 +23,7 @@
 #### 1. Clone this repository
 
 ```console
-$ git clone -b v3.2.1 --single-branch https://github.com/plausible/community-edition plausible-ce
+$ git clone -b v3.2.2 --single-branch https://github.com/plausible/community-edition plausible-ce
 Cloning into 'plausible-ce'...
 
 $ cd plausible-ce
